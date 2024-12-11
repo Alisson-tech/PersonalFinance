@@ -3,10 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Context;
 
-
-public class Context : DbContext
+public class ContextFinance : DbContext
 {
-    public Context(DbContextOptions<Context> options)
+    public ContextFinance(DbContextOptions<ContextFinance> options)
         : base(options)
     {
     }
@@ -33,7 +32,6 @@ public class Context : DbContext
             .HasQueryFilter(a => a.DateDeleted != null);
 
     }
-
 
     public override int SaveChanges()
     {
