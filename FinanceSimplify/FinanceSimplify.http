@@ -1,0 +1,6 @@
+@FinanceSimplify_HostAddress = http://localhost:5122
+
+GET {{FinanceSimplify_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
