@@ -23,7 +23,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         var entity = await _context.Set<T>().FindAsync(id);
 
         if (entity == null)
-            throw new FinanceNotFoundException("Entity not found.");
+            throw new FinanceNotFoundException("Entity not found");
 
         return entity;
     }

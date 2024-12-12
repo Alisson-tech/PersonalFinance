@@ -1,6 +1,6 @@
 using FinanceSimplify.Context;
 using FinanceSimplify.Repositories;
-using FinanceSimplify.Services.Accounts;
+using FinanceSimplify.Services.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 

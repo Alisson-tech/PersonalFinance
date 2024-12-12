@@ -1,4 +1,5 @@
-﻿namespace FinanceSimplify.Repositories;
+﻿
+namespace FinanceSimplify.Repositories;
 
 public interface IGenericRepository<T> where T : class
 {
