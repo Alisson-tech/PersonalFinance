@@ -29,7 +29,7 @@ public class ContextFinance : DbContext
             .HasForeignKey(t => t.AccountId);
 
         modelBuilder.Entity<Accounts>()
-            .HasQueryFilter(a => a.DateDeleted != null);
+            .HasQueryFilter(a => a.DateDeleted == null);
 
     }
 
