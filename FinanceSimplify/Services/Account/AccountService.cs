@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FinanceSimplify.Data;
+using FinanceSimplify.Infraestructure;
+using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
-using FinanceSimplify.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -19,7 +20,7 @@ public class AccountService : IAccountService
         _mapper = mapper;
     }
 
-    public async Task<AccountDto> CreateAccount(AccountDto accountDto)
+    public async Task<AccountDto> CreateAccount(AccountCreate accountDto)
     {
         var account = _mapper.Map<Accounts>(accountDto);
 
@@ -28,7 +29,7 @@ public class AccountService : IAccountService
         return _mapper.Map<AccountDto>(createdAccount);
     }
 
-    public async Task<AccountDto> UpdateAccount(int id, AccountDto accountDto)
+    public async Task<AccountDto> UpdateAccount(int id, AccountCreate accountDto)
     {
         var account = _mapper.Map<Accounts>(accountDto);
 
@@ -44,16 +45,19 @@ public class AccountService : IAccountService
         return _mapper.Map<AccountDto>(account);
     }
 
-    public async Task<List<AccountDto>> GetAccountList(AccountsFilter filter, PaginatedFilter pageFilter)
+    public async Task<PaginatedList<AccountDto>> GetAccountList(AccountsFilter filter, PaginatedFilter pageFilter)
     {
-        var accounts = _accountRepository.GetAll();
+        var accounts = _accountRepository.GetList();
 
         if (filter.Type != null)
         {
             accounts = accounts.Where(x => x.Type == filter.Type);
         }
 
-        return await accounts.ProjectTo<AccountDto>(_mapper.ConfigurationProvider).ToListAsync();
+        return await accounts
+            .OrderByDynamic(pageFilter.OrderBy, pageFilter.OrderAsc)
+            .ProjectTo<AccountDto>(_mapper.ConfigurationProvider)
+            .ToPagedResultAsync(pageFilter.PageNumber, pageFilter.PageSize);
     }
 
     public async Task DeleteAccount(int id)

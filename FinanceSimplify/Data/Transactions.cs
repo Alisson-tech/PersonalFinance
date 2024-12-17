@@ -8,7 +8,7 @@ public class Transactions : BaseEntity
     public TransactionCategory Category { get; set; }
     public decimal Value { get; set; }
     public DateTime Data { get; set; }
-    public string Descricao { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public required Accounts Account { get; set; }
 }
 

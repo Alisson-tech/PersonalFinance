@@ -1,6 +1,6 @@
 ﻿using FinanceSimplify.Exceptions;
+using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Services.Account;
-using FinanceSimplify.Services.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,13 +38,13 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult<AccountDto>> Create([FromBody] AccountDto accountDto) 
+    public async Task<ActionResult<AccountDto>> Create([FromBody] AccountCreate accountDto) 
     {
         return Ok(await _accountService.CreateAccount(accountDto));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<AccountDto>> Update(int id, [FromBody] AccountDto accountDto)
+    public async Task<ActionResult<AccountDto>> Update(int id, [FromBody] AccountCreate accountDto)
     {
         try
         {

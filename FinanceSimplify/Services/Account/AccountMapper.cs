@@ -7,7 +7,7 @@ public class AccountMapper : Profile
 {
     public AccountMapper()
     {
-        CreateMap<Accounts, AccountDto>().ReverseMap();
-
+        CreateMap<Accounts, AccountDto>();
+        CreateMap<AccountCreate, Accounts>();
     }
 }

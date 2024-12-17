@@ -1,5 +1,6 @@
 ﻿using FinanceSimplify.Context;
 using FinanceSimplify.Exceptions;
+using FinanceSimplify.Infraestructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Repositories;
@@ -13,7 +14,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _context = context;
     }
 
-    public IQueryable<T> GetAll()
+    public IQueryable<T> GetList()
     {
         return _context.Set<T>().AsQueryable();
     }
@@ -37,6 +38,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public async Task<T> Update(int id, T entity)
     {
+        entity.GetType().GetProperty("Id")?.SetValue(entity, id);
         var existingEntity = await GetById(id);
 
         _context.Entry(existingEntity).CurrentValues.SetValues(entity);
