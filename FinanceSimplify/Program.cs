@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ContextFinance>(options =>options.UseSqlServer(bui
 builder.Services.AddScoped(provider => new AutoMapper.MapperConfiguration(cfg =>
 {
     cfg.AddProfile(new AccountMapper());
+    cfg.AddProfile(new TransactionMapper());
 }).CreateMapper());
 
 

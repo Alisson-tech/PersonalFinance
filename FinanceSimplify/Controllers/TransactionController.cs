@@ -54,6 +54,10 @@ public class TransactionController : Controller
         {
             return Ok(await _TransactionService.CreateTransaction(TransactionDto));
         }
+        catch (FinanceInternalErrorException ex)
+        {
+            return BadRequest(ex.Message);
+        }
         catch
         {
             return BadRequest("Erro interno");
@@ -70,6 +74,10 @@ public class TransactionController : Controller
         catch (FinanceNotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+        catch (FinanceInternalErrorException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch
         {

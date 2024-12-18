@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FinanceSimplify.Data;
+using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
@@ -21,6 +22,8 @@ public class AccountService : IAccountService
 
     public async Task<AccountDto> CreateAccount(AccountCreate accountCreate)
     {
+        ValidateAccountCreate(accountCreate);
+
         var account = _mapper.Map<Accounts>(accountCreate);
 
         var createdAccount = await _accountRepository.Create(account);
@@ -30,6 +33,8 @@ public class AccountService : IAccountService
 
     public async Task<AccountDto> UpdateAccount(int id, AccountCreate accountCreate)
     {
+        ValidateAccountCreate(accountCreate);
+
         var account = _mapper.Map<Accounts>(accountCreate);
 
         var updatedAccount = await _accountRepository.Update(id, account);
@@ -62,5 +67,13 @@ public class AccountService : IAccountService
     public async Task DeleteAccount(int id)
     {
         await _accountRepository.SoftDelete(id);
+    }
+
+    private static void ValidateAccountCreate(AccountCreate accountCreate)
+    {
+        if (!Enum.IsDefined(typeof(AccountType), accountCreate.Type))
+        {
+            throw new FinanceInternalErrorException("tipo Inválido");
+        }
     }
 }

@@ -7,8 +7,7 @@ public class TransactionMapper : Profile
 {
     public TransactionMapper()
     {
-        CreateMap<Transactions, TransactionDto>()
-            .ForMember(dest => dest.AccountName, map => map.MapFrom(src => src.Account.Name));
+        CreateMap<Transactions, TransactionDto>();
         CreateMap<TransactionCreate, Transactions>();
             
     }

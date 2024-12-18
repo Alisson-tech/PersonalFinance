@@ -34,12 +34,27 @@ public class AccountController : Controller
         {
             return NotFound(ex.Message);
         }
+        catch
+        {
+            return BadRequest("Erro interno");
+        }
     }
 
     [HttpPost]
     public async Task<ActionResult<AccountDto>> Create([FromBody] AccountCreate accountDto) 
     {
-        return Ok(await _accountService.CreateAccount(accountDto));
+        try
+        {
+            return Ok(await _accountService.CreateAccount(accountDto));
+        }
+        catch (FinanceInternalErrorException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
+        }
     }
 
     [HttpPut("{id}")]
@@ -52,6 +67,14 @@ public class AccountController : Controller
         catch (FinanceNotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+        catch (FinanceInternalErrorException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
         }
     }
 
@@ -66,6 +89,10 @@ public class AccountController : Controller
         catch (FinanceNotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
         }
     }
 

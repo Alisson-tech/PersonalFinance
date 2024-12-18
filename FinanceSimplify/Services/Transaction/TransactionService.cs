@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FinanceSimplify.Data;
+using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
+using FinanceSimplify.Services.Account;
 
 namespace FinanceSimplify.Services.Transaction;
 
@@ -20,6 +22,8 @@ public class TransactionService : ITransactionService
 
     public async Task<TransactionDto> CreateTransaction(TransactionCreate TransactionCreate)
     {
+        ValidateTransactionCreate(TransactionCreate);
+
         var Transaction = _mapper.Map<Transactions>(TransactionCreate);
 
         var createdTransaction = await _transactionRepository.Create(Transaction);
@@ -29,6 +33,8 @@ public class TransactionService : ITransactionService
 
     public async Task<TransactionDto> UpdateTransaction(int id, TransactionCreate TransactionCreate)
     {
+        ValidateTransactionCreate(TransactionCreate);
+
         var Transaction = _mapper.Map<Transactions>(TransactionCreate);
 
         var updatedTransaction = await _transactionRepository.Update(id, Transaction);
@@ -61,5 +67,18 @@ public class TransactionService : ITransactionService
     public async Task DeleteTransaction(int id)
     {
         await _transactionRepository.HardDelete(id);
+    }
+
+    private static void ValidateTransactionCreate(TransactionCreate TransactionCreate)
+    {
+        if (!Enum.IsDefined(typeof(TransactionCategory), TransactionCreate.Category))
+        {
+            throw new FinanceInternalErrorException($"categoria Inválida");
+        }
+
+        if (!Enum.IsDefined(typeof(TransactionType), TransactionCreate.Type))
+        {
+            throw new FinanceInternalErrorException("tipo Inválido");
+        }
     }
 }
