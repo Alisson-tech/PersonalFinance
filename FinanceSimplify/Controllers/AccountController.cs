@@ -1,7 +1,6 @@
 ﻿using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Services.Account;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Controllers;

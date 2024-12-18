@@ -4,7 +4,6 @@ using FinanceSimplify.Data;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace FinanceSimplify.Services.Account;
@@ -20,18 +19,18 @@ public class AccountService : IAccountService
         _mapper = mapper;
     }
 
-    public async Task<AccountDto> CreateAccount(AccountCreate accountDto)
+    public async Task<AccountDto> CreateAccount(AccountCreate accountCreate)
     {
-        var account = _mapper.Map<Accounts>(accountDto);
+        var account = _mapper.Map<Accounts>(accountCreate);
 
         var createdAccount = await _accountRepository.Create(account);
 
         return _mapper.Map<AccountDto>(createdAccount);
     }
 
-    public async Task<AccountDto> UpdateAccount(int id, AccountCreate accountDto)
+    public async Task<AccountDto> UpdateAccount(int id, AccountCreate accountCreate)
     {
-        var account = _mapper.Map<Accounts>(accountDto);
+        var account = _mapper.Map<Accounts>(accountCreate);
 
         var updatedAccount = await _accountRepository.Update(id, account);
 
