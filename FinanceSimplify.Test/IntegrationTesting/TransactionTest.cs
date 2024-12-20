@@ -1,4 +1,8 @@
+using AutoMapper;
+using FinanceSimplify.Context;
 using FinanceSimplify.Data;
+using FinanceSimplify.Repositories;
+using FinanceSimplify.Services.Transaction;
 using FinanceSimplify.Test.Context;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
@@ -25,5 +29,21 @@ public class TransactionTest
         var teste = db.Accounts.First();
 
         Assert.True(true);
+    }
+
+
+
+    private static async Task AddTransactionDatabase(ContextFinance context, List<Transactions> listAccount)
+    {
+        await context.Transactions.AddRangeAsync(listAccount);
+        await context.SaveChangesAsync();
+    }
+
+    private static TransactionService CreateTransactionService(ContextFinance context)
+    {
+        var repository = new GenericRepository<Transactions>(context);
+        var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile<TransactionMapper>()));
+
+        return new TransactionService(repository, mapper);
     }
 }

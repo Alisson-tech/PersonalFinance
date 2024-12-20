@@ -167,7 +167,7 @@ public class AccountTest
         Assert.NotNull(account.DateDeleted);
     }
 
-    private async Task AddAccountDatabase(ContextFinance context, List<Accounts> listAccount)
+    private static async Task AddAccountDatabase(ContextFinance context, List<Accounts> listAccount)
     {
         await context.Accounts.AddRangeAsync(listAccount);
         await context.SaveChangesAsync();
