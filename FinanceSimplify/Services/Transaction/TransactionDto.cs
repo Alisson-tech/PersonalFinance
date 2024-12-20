@@ -8,7 +8,7 @@ public class TransactionDto
     public TransactionType Type { get; set; }
     public TransactionCategory Category { get; set; }
     public decimal Value { get; set; }
-    public DateTime Data { get; set; }
+    public DateTime Date { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public required string AccountName { get; set; } = string.Empty;
 }

@@ -8,8 +8,8 @@ public class TransactionMapper : Profile
     public TransactionMapper()
     {
         CreateMap<Transactions, TransactionDto>();
-        CreateMap<TransactionCreate, Transactions>();
-            
+        CreateMap<TransactionCreate, Transactions>()
+            .ForMember(dest => dest.Account, opt => opt.Ignore());
     }
 }
 

@@ -9,7 +9,7 @@ public class Transactions : BaseEntity
     public decimal Value { get; set; }
     public DateTime Date { get; set; }
     public string Description { get; set; } = string.Empty;
-    public Accounts Account { get; set; } = new();
+    public Accounts? Account { get; set; }
 }
 
 public enum TransactionType
