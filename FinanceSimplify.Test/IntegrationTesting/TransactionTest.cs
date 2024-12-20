@@ -1,7 +1,7 @@
 using FinanceSimplify.Data;
 using FinanceSimplify.Test.Context;
 
-namespace FinanceSimplify.Test;
+namespace FinanceSimplify.Test.IntegrationTesting;
 
 public class TransactionTest
 {

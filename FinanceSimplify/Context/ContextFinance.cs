@@ -23,9 +23,9 @@ public class ContextFinance : DbContext
         modelBuilder.Entity<Transactions>()
             .HasKey(t => t.Id);
 
-        modelBuilder.Entity<Accounts>()
-            .HasMany(a => a.Transactions)
-            .WithOne(t => t.Account)
+        modelBuilder.Entity<Transactions>()
+            .HasOne(t => t.Account)
+            .WithMany()
             .HasForeignKey(t => t.AccountId);
 
         modelBuilder.Entity<Accounts>()

@@ -6,7 +6,6 @@ public class Accounts : BaseEntity
     public AccountType Type { get; set; }
     public string Name { get; set; } = string.Empty;
     public decimal Balance { get; set; }
-    public List<Transactions> Transactions { get; set; } = new();
     public DateTime? DateDeleted { get; set; }
 }
 
