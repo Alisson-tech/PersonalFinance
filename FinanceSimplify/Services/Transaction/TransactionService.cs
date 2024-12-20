@@ -5,7 +5,6 @@ using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
-using FinanceSimplify.Services.Account;
 
 namespace FinanceSimplify.Services.Transaction;
 
@@ -51,12 +50,12 @@ public class TransactionService : ITransactionService
 
     public async Task<PaginatedList<TransactionDto>> GetTransactionList(TransactionFilter filter, PaginatedFilter pageFilter)
     {
-        var Transactions = _transactionRepository.GetList();
-
-        if (filter.Type != null)
-        {
-            Transactions = Transactions.Where(x => x.Type == filter.Type);
-        }
+        var Transactions = _transactionRepository.GetList()
+            .Where(t => (filter.AccountId == null || t.AccountId == filter.AccountId) &&
+                (filter.Category == null || t.Category == filter.Category) &&
+                (filter.Description == null || t.Description == filter.Description) &&
+                (filter.DateStart == null || t.Date >= filter.DateStart) &&
+                (filter.DateFinish == null || t.Date <= filter.DateFinish));
 
         return await Transactions
             .OrderByDynamic(pageFilter.OrderBy, pageFilter.OrderAsc)

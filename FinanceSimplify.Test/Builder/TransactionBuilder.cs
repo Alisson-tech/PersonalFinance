@@ -4,22 +4,22 @@ namespace FinanceSimplify.Test.Builder;
 
 public class TransactionBuilder
 {
-    private int _id = 1;
-    private int _accountId = 1;
+    private int _id;
+    private int _accountId;
     private TransactionType _type;
     private TransactionCategory _category;
-    private decimal _value = 100.00M;
-    private DateTime _date = DateTime.Now;
-    private string _description = "Default Transaction";
-    public TransactionBuilder WithDefaults(int? id = null, int? accountId = null, TransactionType type = TransactionType.Expense, TransactionCategory category = TransactionCategory.Debit, decimal? value = null, DateTime? date = null, string description = null)
+    private decimal _value;
+    private DateTime _date;
+    private string _description;
+    public TransactionBuilder WithDefaults(int? id = null, int? accountId = null, TransactionType? type = TransactionType.Expense, TransactionCategory? category = TransactionCategory.Debit, decimal? value = null, DateTime? date = null, string? description = null)
     {
-        _id = id ?? _id;
-        _accountId = accountId ?? _accountId;
-        _type = type;
-        _category = category;
-        _value = value ?? _value;
-        _description = description ?? _description;
-        _date = date ?? _date;
+        _id = id ?? 1;
+        _accountId = accountId ?? 1;
+        _type = type ?? TransactionType.Expense;
+        _category = category ?? TransactionCategory.Electricity;
+        _value = value ?? 100.00M;
+        _description = description ?? "Default Transaction";
+        _date = date ?? DateTime.Now; ;
         return this;
     }
 
