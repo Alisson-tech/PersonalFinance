@@ -35,20 +35,6 @@ public class TransactionService : ITransactionService
         return _mapper.Map<TransactionDto>(createdTransaction);
     }
 
-    public async Task<TransactionDto> UpdateTransaction(int id, TransactionCreate TransactionCreate)
-    {
-        ValidateTransactionTypes(TransactionCreate);
-
-        var account = await GetAccountByTransaction(TransactionCreate.AccountId);
-        CalculatorValueAccount(account, TransactionCreate);
-
-        var Transaction = _mapper.Map<Transactions>(TransactionCreate);
-
-        var updatedTransaction = await _transactionRepository.Update(id, Transaction);
-
-        return _mapper.Map<TransactionDto>(updatedTransaction);
-    }
-
     public async Task<TransactionDto> GetTransaction(int id)
     {
         var Transaction = await _transactionRepository.GetById(id);

@@ -96,61 +96,6 @@ public class TransactionTest
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
-    [Theory]
-    [InlineData(1, (TransactionType)100, (TransactionCategory)1, typeof(BadRequestObjectResult))]
-    [InlineData(1, (TransactionType)1, (TransactionCategory)100, typeof(BadRequestObjectResult))]
-    [InlineData(100, (TransactionType)1, (TransactionCategory)1, typeof(NotFoundObjectResult))]
-    public async Task UpdateTransactionInvalid_ShouldReturnStatusCode(int id, TransactionType transactionType, TransactionCategory transactionCategory, Type requestObject)
-    {
-        // Arrange
-        var context = _contextTest.CreateContext();
-        var transactionController = CreateTransactionController(context);
-        var data = _transactionBuilder.Build(10);
-        await AddTransactionDatabase(context, data);
-        var transactionCreate = new TransactionCreate() { Type = transactionType, Category = transactionCategory, Value = 100.00M, Date = DateTime.Now, Description = "Transaction Test" };
-
-        //Act & assert
-        var result = await transactionController.Update(id, transactionCreate);
-        Assert.IsType(requestObject, result.Result);
-    }
-
-    [Fact]
-    public async Task UpdateTransaction_ShouldReturnCorrectData()
-    {
-        // Arrange
-        var context = _contextTest.CreateContext();
-        var transactionController = CreateTransactionController(context);
-
-        var accountId = 1;
-        var type = TransactionType.Income;
-        var category = TransactionCategory.Salary;
-        var date = DateTime.Now;
-        var description = "Recebimento de salário";
-        var value = 51.890M;
-
-        await AddTransactionDatabase(context, new());
-        var account = await context.Accounts
-            .FirstAsync(a => a.Id == accountId);
-        var accountBalance = account.Balance - value;
-
-        //Act
-        var result = await transactionController.Create(new TransactionCreate
-        { AccountId = accountId, Category = category, Type = type, Date = date, Description = description, Value = value });
-
-        //assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        Assert.NotNull(okResult);
-
-        var response = Assert.IsAssignableFrom<TransactionDto>(okResult.Value);
-        Assert.NotNull(response);
-        Assert.Equal(account.Name, response.AccountName);
-        Assert.Equal(description, response.Description);
-        Assert.Equal(type, response.Type);
-        Assert.Equal(category, response.Category);
-        Assert.Equal(value, response.Value);
-        Assert.Equal(date, response.Date);
-    }
-
     [Fact]
     public async Task CreateTransactionIncome_ShouldReturnCorrectData()
     {
