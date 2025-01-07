@@ -19,7 +19,7 @@ public class TransactionCreate
     public TransactionType Type { get; set; }
     public TransactionCategory Category { get; set; }
     public decimal Value { get; set; }
-    public string Descricao { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public DateTime Date { get; set; }
 }
 

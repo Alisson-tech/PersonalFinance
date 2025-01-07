@@ -58,6 +58,10 @@ public class TransactionController : Controller
         {
             return BadRequest(ex.Message);
         }
+        catch (FinanceNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         catch
         {
             return BadRequest("Erro interno");

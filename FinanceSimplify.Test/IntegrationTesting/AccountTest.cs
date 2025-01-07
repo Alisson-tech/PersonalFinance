@@ -156,14 +156,14 @@ public class AccountTest
     [Theory]
     [InlineData(100, AccountType.DebitCard, typeof(NotFoundObjectResult))]
     [InlineData(1, (AccountType)10, typeof(BadRequestObjectResult))]
-    public async Task UpdateAccountInvalidId_ShouldReturnFinanceException(int id, AccountType type, Type requestObject)
+    public async Task UpdateAccountInvalid_ShouldReturnStatusCode(int id, AccountType accountType, Type requestObject)
     {
         // Arrange
         var context = _contextTest.CreateContext();
         var accountController = CreateAccountController(context);
         var data = _accountBuilder.Build(10);
         await AddAccountDatabase(context, data);
-        var accountCreate = new AccountCreate() { Name = "Account Test Update", Type = type, Balance = 1000.00M };
+        var accountCreate = new AccountCreate() { Name = "Account Test Update", Type = accountType, Balance = 1000.00M };
 
         //Act & assert
         var result = await accountController.Update(id, accountCreate);
@@ -171,7 +171,7 @@ public class AccountTest
     }
 
     [Fact]
-    public async Task DeleteAccount_ShouldReturnCorrectData()
+    public async Task DeleteAccount_ShouldReturnOk()
     {
         // Arrange
         var context = _contextTest.CreateContext();

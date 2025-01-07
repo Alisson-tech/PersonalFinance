@@ -96,12 +96,158 @@ public class TransactionTest
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
+    [Theory]
+    [InlineData(1, (TransactionType)100, (TransactionCategory)1, typeof(BadRequestObjectResult))]
+    [InlineData(1, (TransactionType)1, (TransactionCategory)100, typeof(BadRequestObjectResult))]
+    [InlineData(100, (TransactionType)1, (TransactionCategory)1, typeof(NotFoundObjectResult))]
+    public async Task UpdateTransactionInvalid_ShouldReturnStatusCode(int id, TransactionType transactionType, TransactionCategory transactionCategory, Type requestObject)
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+        var data = _transactionBuilder.Build(10);
+        await AddTransactionDatabase(context, data);
+        var transactionCreate = new TransactionCreate() { Type = transactionType, Category = transactionCategory, Value = 100.00M, Date = DateTime.Now, Description = "Transaction Test" };
+
+        //Act & assert
+        var result = await transactionController.Update(id, transactionCreate);
+        Assert.IsType(requestObject, result.Result);
+    }
+
+    [Fact]
+    public async Task UpdateTransaction_ShouldReturnCorrectData()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        var accountId = 1;
+        var type = TransactionType.Income;
+        var category = TransactionCategory.Salary;
+        var date = DateTime.Now;
+        var description = "Recebimento de salário";
+        var value = 51.890M;
+
+        await AddTransactionDatabase(context, new());
+        var account = await context.Accounts
+            .FirstAsync(a => a.Id == accountId);
+        var accountBalance = account.Balance - value;
+
+        //Act
+        var result = await transactionController.Create(new TransactionCreate
+        { AccountId = accountId, Category = category, Type = type, Date = date, Description = description, Value = value });
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TransactionDto>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(account.Name, response.AccountName);
+        Assert.Equal(description, response.Description);
+        Assert.Equal(type, response.Type);
+        Assert.Equal(category, response.Category);
+        Assert.Equal(value, response.Value);
+        Assert.Equal(date, response.Date);
+    }
+
+    [Fact]
+    public async Task CreateTransactionIncome_ShouldReturnCorrectData()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        var accountId = 1;
+        var type = TransactionType.Income;
+        var category = TransactionCategory.Salary;
+        var date = DateTime.Now;
+        var description = "Recebimento de salário";
+        var value = 51.890M;
+
+        await AddTransactionDatabase(context, new());
+        var account = await context.Accounts
+            .FirstAsync(a => a.Id == accountId);
+        var accountBalance = account.Balance + value;
+
+        //Act
+        var result = await transactionController.Create(new TransactionCreate
+        { AccountId = accountId, Category = category, Type = type, Date = date, Description = description, Value = value });
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TransactionDto>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(account.Name, response.AccountName);
+        Assert.Equal(description, response.Description);
+        Assert.Equal(type, response.Type);
+        Assert.Equal(category, response.Category);
+        Assert.Equal(value, response.Value);
+        Assert.Equal(date, response.Date);
+    }
+
+    [Fact]
+    public async Task CreateTransactionExpensive_ShouldReturnCorrectData()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        var accountId = 1;
+        var type = TransactionType.Income;
+        var category = TransactionCategory.Salary;
+        var date = DateTime.Now;
+        var description = "Recebimento de salário";
+        var value = 51.890M;
+
+        await AddTransactionDatabase(context, new());
+        var account = await context.Accounts
+            .FirstAsync(a => a.Id == accountId);
+        var accountBalance = account.Balance - value;
+
+        //Act
+        var result = await transactionController.Create(new TransactionCreate
+        { AccountId = accountId, Category = category, Type = type, Date = date, Description = description, Value = value });
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TransactionDto>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(account.Name, response.AccountName);
+        Assert.Equal(description, response.Description);
+        Assert.Equal(type, response.Type);
+        Assert.Equal(category, response.Category);
+        Assert.Equal(value, response.Value);
+        Assert.Equal(date, response.Date);
+    }
+
+    [Theory]
+    [InlineData(1, (TransactionType)100, (TransactionCategory)1, typeof(BadRequestObjectResult))]
+    [InlineData(1, (TransactionType)1, (TransactionCategory)100, typeof(BadRequestObjectResult))]
+    [InlineData(100, (TransactionType)1, (TransactionCategory)1, typeof(NotFoundObjectResult))]
+    public async Task CreateTransactionInvalid_ShouldReturnStatusCode(int accountId, TransactionType transactionType, TransactionCategory transactionCategory, Type requestObject)
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        var transactionCreate = new TransactionCreate() { AccountId = accountId, Type = transactionType, Category = transactionCategory, Value = 100.00M, Date = DateTime.Now, Description = "Transaction Test" };
+
+        //Act & assert
+        var result = await transactionController.Create(transactionCreate);
+        Assert.IsType(requestObject, result.Result);
+    }
+
     private static async Task AddTransactionDatabase(ContextFinance context, List<Transactions> listTransaction)
     {
         var AccounntBuilder = new AccountsBuilder();
-        var listAccount = AccounntBuilder.CreateDefault().Build(3);
+        var listtransaction = AccounntBuilder.CreateDefault().Build(3);
 
-        await context.Accounts.AddRangeAsync(listAccount);
+        await context.Accounts.AddRangeAsync(listtransaction);
         await context.SaveChangesAsync();
 
         await context.Transactions.AddRangeAsync(listTransaction);
@@ -112,10 +258,10 @@ public class TransactionTest
 
     private static TransactionController CreateTransactionController(ContextFinance context)
     {
-        var repository = new GenericRepository<Transactions>(context);
-        var accountRepository = new GenericRepository<Accounts>(context);
+        var accountRepository = new GenericRepository<Transactions>(context);
+        var transactionRepository = new GenericRepository<Accounts>(context);
         var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile<TransactionMapper>()));
-        var service = new TransactionService(repository, accountRepository, mapper);
+        var service = new TransactionService(accountRepository, transactionRepository, mapper);
 
         return new TransactionController(service);
     }
@@ -171,6 +317,31 @@ public class TransactionTest
                 DateStart = DateTime.Now.AddDays(-10),
                 DateFinish = DateTime.Now.AddDays(-2),
                 Description = "Pix para Victor"
+            }
+        };
+    }
+
+    public static IEnumerable<object[]> GetTransactionCreate()
+    {
+        yield return new object[]
+        {
+            new TransactionCreate
+            {
+                AccountId = 1,
+                Type = TransactionType.Income,
+                Category = TransactionCategory.Salary,
+                Date = DateTime.Now,
+                Description = "Recebimento de salário",
+                Value = 51.890M
+            },
+            new TransactionCreate
+            {
+                AccountId = 2,
+                Type = TransactionType.Expense,
+                Category = TransactionCategory.Debit,
+                Date = DateTime.Now,
+                Description = "Pix para Victor",
+                Value = 35.670M
             }
         };
     }
