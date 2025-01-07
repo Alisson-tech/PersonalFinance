@@ -21,14 +21,14 @@ public class TransactionService : ITransactionService
         _mapper = mapper;
     }
 
-    public async Task<TransactionDto> CreateTransaction(TransactionCreate TransactionCreate)
+    public async Task<TransactionDto> CreateTransaction(TransactionCreate transactionCreate)
     {
-        ValidateTransactionTypes(TransactionCreate);
+        ValidateTransactionTypes(transactionCreate);
 
-        var account = await GetAccountByTransaction(TransactionCreate.AccountId);
-        CalculatorValueAccount(account, TransactionCreate);
+        var account = await GetAccountById(transactionCreate.AccountId);
+        CalculatorValueAccount(account, transactionCreate.Type, transactionCreate.Value);
 
-        var Transaction = _mapper.Map<Transactions>(TransactionCreate);
+        var Transaction = _mapper.Map<Transactions>(transactionCreate);
 
         var createdTransaction = await _transactionRepository.Create(Transaction);
 
@@ -44,7 +44,7 @@ public class TransactionService : ITransactionService
 
     public async Task<PaginatedList<TransactionDto>> GetTransactionList(TransactionFilter filter, PaginatedFilter pageFilter)
     {
-        var Transactions = _transactionRepository.GetList()
+        var Transactions = _transactionRepository.GetIqueryble()
             .Where(t => (filter.AccountId == null || t.AccountId == filter.AccountId) &&
                 (filter.Category == null || t.Category == filter.Category) &&
                 (filter.Description == null || t.Description == filter.Description) &&
@@ -59,10 +59,14 @@ public class TransactionService : ITransactionService
 
     public async Task DeleteTransaction(int id)
     {
+        var transaction = await _transactionRepository.GetById(id);
+        var account = await GetAccountById(transaction.AccountId);
+        CalculatorValueAccount(account, transaction.Type, transaction.Value);
+
         await _transactionRepository.HardDelete(id);
     }
 
-    private async Task<Accounts> GetAccountByTransaction(int accountId)
+    private async Task<Accounts> GetAccountById(int accountId)
     {
         var account = await _accountRepository.GetById(accountId);
 
@@ -87,15 +91,15 @@ public class TransactionService : ITransactionService
         }
     }
 
-    private static void CalculatorValueAccount(Accounts account, TransactionCreate TransactionCreate)
+    private static void CalculatorValueAccount(Accounts account, TransactionType transactionType, decimal transactionValue)
     {
-        if (TransactionCreate.Type == TransactionType.Expense)
+        if (transactionType == TransactionType.Expense)
         {
-            account.Balance -= TransactionCreate.Value;
+            account.Balance -= transactionValue;
         }
         else
         {
-            account.Balance += TransactionCreate.Value;
+            account.Balance += transactionValue;
         }
     }
 }

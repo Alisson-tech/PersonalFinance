@@ -131,6 +131,7 @@ public class TransactionTest
         Assert.Equal(category, response.Category);
         Assert.Equal(value, response.Value);
         Assert.Equal(date, response.Date);
+        Assert.Equal(accountBalance, account.Balance);
     }
 
     [Fact]
@@ -141,8 +142,8 @@ public class TransactionTest
         var transactionController = CreateTransactionController(context);
 
         var accountId = 1;
-        var type = TransactionType.Income;
-        var category = TransactionCategory.Salary;
+        var type = TransactionType.Expense;
+        var category = TransactionCategory.Debit;
         var date = DateTime.Now;
         var description = "Recebimento de salário";
         var value = 51.890M;
@@ -168,6 +169,7 @@ public class TransactionTest
         Assert.Equal(category, response.Category);
         Assert.Equal(value, response.Value);
         Assert.Equal(date, response.Date);
+        Assert.Equal(accountBalance, account.Balance);
     }
 
     [Theory]
@@ -186,6 +188,85 @@ public class TransactionTest
         var result = await transactionController.Create(transactionCreate);
         Assert.IsType(requestObject, result.Result);
     }
+
+    [Fact]
+    public async Task DeleteTransactionIncome_ShouldReturnOk()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        int id = 1;
+        var accountId = 1;
+        decimal value = 85.45M;
+        var type = TransactionType.Income;
+
+        var data = _transactionBuilder.WithDefaults(id: id, accountId: accountId, value: value, type: type).Build(1);
+        await AddTransactionDatabase(context, data);
+        var account = await context.Accounts
+            .FirstAsync(a => a.Id == accountId);
+        var accountBalance = account.Balance + value;
+
+        //Act
+        var result = await transactionController.Delete(id);
+
+        //assert
+        var transaction = await context.Transactions.FindAsync(id);
+
+        Assert.Null(transaction);
+        Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(accountBalance, account.Balance);
+    }
+
+    [Fact]
+    public async Task DeleteTransactionExpensive_ShouldReturnOk()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+
+        int id = 1;
+        var accountId = 1;
+        decimal value = 85.45M;
+        var type = TransactionType.Expense;
+
+        var data = _transactionBuilder.WithDefaults(id: id, accountId: accountId, value: value, type: type).Build(1);
+        await AddTransactionDatabase(context, data);
+        var account = await context.Accounts
+            .FirstAsync(a => a.Id == accountId);
+        var accountBalance = account.Balance - value;
+
+        //Act
+        var result = await transactionController.Delete(id);
+
+        //assert
+        var transaction = await context.Transactions.FindAsync(id);
+
+        Assert.Null(transaction);
+        Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(accountBalance, account.Balance);
+    }
+
+    [Fact]
+    public async Task DeleteTransactioninvalidId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateTransactionController(context);
+        int id = 100;
+
+        var data = _transactionBuilder.Build(1);
+        await AddTransactionDatabase(context, data);
+
+        //Act
+        var result = await transactionController.Delete(id);
+
+        //assert
+        var transaction = await context.Transactions.FindAsync(id);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
 
     private static async Task AddTransactionDatabase(ContextFinance context, List<Transactions> listTransaction)
     {

@@ -1,6 +1,5 @@
 ﻿using FinanceSimplify.Context;
 using FinanceSimplify.Exceptions;
-using FinanceSimplify.Infraestructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Repositories;
@@ -14,7 +13,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _context = context;
     }
 
-    public IQueryable<T> GetList()
+    public IQueryable<T> GetIqueryble()
     {
         return _context.Set<T>().AsQueryable();
     }

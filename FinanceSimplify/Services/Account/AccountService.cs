@@ -51,7 +51,7 @@ public class AccountService : IAccountService
 
     public async Task<PaginatedList<AccountDto>> GetAccountList(AccountsFilter filter, PaginatedFilter pageFilter)
     {
-        var accounts = _accountRepository.GetList();
+        var accounts = _accountRepository.GetIqueryble();
 
         if (filter.Type != null)
         {
