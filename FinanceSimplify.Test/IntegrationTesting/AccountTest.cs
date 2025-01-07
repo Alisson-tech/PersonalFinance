@@ -6,7 +6,7 @@ using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Account;
 using FinanceSimplify.Test.Builder;
-using FinanceSimplify.Test.Context;
+using FinanceSimplify.Test.IntegrationTesting.Context;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
 
@@ -30,8 +30,8 @@ public class AccountTest
         int quantityAccountCreate = 5;
         AccountType filterDebitCard = AccountType.DebitCard;
 
-        var datafilterDebitCard = _accountBuilder.WithDefaults(type: filterDebitCard).Build(quantityAccountCreate);
-        var datafilterCreditCard = _accountBuilder.WithDefaults(id: quantityAccountCreate + 1, type: AccountType.CreditCard).Build(quantityAccountCreate);
+        var datafilterDebitCard = _accountBuilder.CreateDefault(type: filterDebitCard).Build(quantityAccountCreate);
+        var datafilterCreditCard = _accountBuilder.CreateDefault(id: quantityAccountCreate + 1, type: AccountType.CreditCard).Build(quantityAccountCreate);
         var data = datafilterDebitCard.Concat(datafilterCreditCard).ToList();
         await AddAccountDatabase(context, data);
 
@@ -53,7 +53,7 @@ public class AccountTest
         var accountService = CreateAccountService(context);
         int id = 1;
         string name = "Account Test id";
-        var data = _accountBuilder.WithDefaults(id: id, name: name).Build(1);
+        var data = _accountBuilder.CreateDefault(id: id, name: name).Build(1);
         await AddAccountDatabase(context, data);
 
         //Act
@@ -117,7 +117,7 @@ public class AccountTest
         var context = _contextTest.CreateContext();
         var accountService = CreateAccountService(context);
         int id = 1;
-        var data = _accountBuilder.WithDefaults(id: id).Build(1);
+        var data = _accountBuilder.CreateDefault(id: id).Build(1);
         await AddAccountDatabase(context, data);
         var accountCreate = new AccountCreate() { Name = "Account Test Update", Type = AccountType.CreditCard, Balance = 1000.00M };
 
@@ -155,7 +155,7 @@ public class AccountTest
         var context = _contextTest.CreateContext();
         var accountService = CreateAccountService(context);
         int id = 1;
-        var data = _accountBuilder.WithDefaults(id: id).Build(1);
+        var data = _accountBuilder.CreateDefault(id: id).Build(1);
         await AddAccountDatabase(context, data);
 
         //Act
@@ -171,6 +171,8 @@ public class AccountTest
     {
         await context.Accounts.AddRangeAsync(listAccount);
         await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
     }
 
     private static AccountService CreateAccountService(ContextFinance context)

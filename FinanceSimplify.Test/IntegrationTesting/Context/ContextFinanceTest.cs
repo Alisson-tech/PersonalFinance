@@ -1,7 +1,7 @@
 ﻿using FinanceSimplify.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceSimplify.Test.Context;
+namespace FinanceSimplify.Test.IntegrationTesting.Context;
 
 public class ContextFinanceTest : IDisposable
 {

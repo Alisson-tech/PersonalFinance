@@ -11,13 +11,14 @@ public class AccountsBuilder
     private DateTime? _dateDeleted = null;
 
 
-    public AccountsBuilder WithDefaults(int? id = null, AccountType? type = null, string name = null, decimal? balance = null, DateTime? dateDeleted = null)
+    public AccountsBuilder CreateDefault(int? id = null, AccountType? type = null, string name = null, decimal? balance = null, DateTime? dateDeleted = null)
     {
         _id = id ?? _id;
-        _type = type ?? _type;
-        _name = name ?? _name;
-        _balance = balance ?? _balance;
-        _dateDeleted = dateDeleted ?? _dateDeleted;
+        _type = type ?? AccountType.CreditCard;
+        _name = name ?? "Default Account";
+        _balance = balance ?? 1000.00M;
+        _dateDeleted = dateDeleted ?? null;
+
         return this;
     }
 

@@ -10,18 +10,23 @@ namespace FinanceSimplify.Services.Transaction;
 
 public class TransactionService : ITransactionService
 {
-    IGenericRepository<Transactions> _transactionRepository;
-    IMapper _mapper;
+    private readonly IGenericRepository<Transactions> _transactionRepository;
+    private readonly IGenericRepository<Accounts> _accountRepository;
+    private readonly IMapper _mapper;
 
-    public TransactionService(IGenericRepository<Transactions> TransactionRepository, IMapper mapper)
+    public TransactionService(IGenericRepository<Transactions> transactionRepository, IGenericRepository<Accounts> accountRepository, IMapper mapper)
     {
-        _transactionRepository = TransactionRepository;
+        _transactionRepository = transactionRepository;
+        _accountRepository = accountRepository;
         _mapper = mapper;
     }
 
     public async Task<TransactionDto> CreateTransaction(TransactionCreate TransactionCreate)
     {
-        ValidateTransactionCreate(TransactionCreate);
+        ValidateTransactionTypes(TransactionCreate);
+
+        var account = await GetAccountByTransaction(TransactionCreate.AccountId);
+        CalculatorValueAccount(account, TransactionCreate);
 
         var Transaction = _mapper.Map<Transactions>(TransactionCreate);
 
@@ -32,7 +37,10 @@ public class TransactionService : ITransactionService
 
     public async Task<TransactionDto> UpdateTransaction(int id, TransactionCreate TransactionCreate)
     {
-        ValidateTransactionCreate(TransactionCreate);
+        ValidateTransactionTypes(TransactionCreate);
+
+        var account = await GetAccountByTransaction(TransactionCreate.AccountId);
+        CalculatorValueAccount(account, TransactionCreate);
 
         var Transaction = _mapper.Map<Transactions>(TransactionCreate);
 
@@ -68,7 +76,19 @@ public class TransactionService : ITransactionService
         await _transactionRepository.HardDelete(id);
     }
 
-    private static void ValidateTransactionCreate(TransactionCreate TransactionCreate)
+    private async Task<Accounts> GetAccountByTransaction(int accountId)
+    {
+        var account = await _accountRepository.GetById(accountId);
+
+        if (account == null)
+        {
+            throw new FinanceNotFoundException("Conta não encontrada");
+        }
+
+        return account;
+    }
+
+    private static void ValidateTransactionTypes(TransactionCreate TransactionCreate)
     {
         if (!Enum.IsDefined(typeof(TransactionCategory), TransactionCreate.Category))
         {
@@ -78,6 +98,18 @@ public class TransactionService : ITransactionService
         if (!Enum.IsDefined(typeof(TransactionType), TransactionCreate.Type))
         {
             throw new FinanceInternalErrorException("tipo Inválido");
+        }
+    }
+
+    private static void CalculatorValueAccount(Accounts account, TransactionCreate TransactionCreate)
+    {
+        if (TransactionCreate.Type == TransactionType.Expense)
+        {
+            account.Balance -= TransactionCreate.Value;
+        }
+        else
+        {
+            account.Balance += TransactionCreate.Value;
         }
     }
 }

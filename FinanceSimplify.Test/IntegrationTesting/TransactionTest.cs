@@ -1,11 +1,12 @@
 using AutoMapper;
 using FinanceSimplify.Context;
 using FinanceSimplify.Data;
+using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
 using FinanceSimplify.Test.Builder;
-using FinanceSimplify.Test.Context;
+using FinanceSimplify.Test.IntegrationTesting.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
@@ -51,24 +52,61 @@ public class TransactionTest
         Assert.Equal(quantityTransactionCreateFilter + quantityTransactionCreateGeral, totalItems);
     }
 
+    [Fact]
+    public async Task GetTransactionById_ShouldReturnCorrectData()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionService = CreateTransactionService(context);
+        int id = 1;
+        string description = "Transaction Test id";
+        var data = _transactionBuilder.WithDefaults(id: id, description: description).Build(1);
+        await AddTransactionDatabase(context, data);
+
+        //Act
+        var result = await transactionService!.GetTransaction(id);
+
+        //assert
+        Assert.NotNull(result);
+        Assert.Equal(id, result.Id);
+        Assert.Equal(description, result.Description);
+    }
+
+    [Fact]
+    public async Task GetTransactionInvalidId_ShouldReturnFinanceException()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionService = CreateTransactionService(context);
+        int id = 100;
+        var data = _transactionBuilder.Build(10);
+        await AddTransactionDatabase(context, data);
+
+        //Act & assert
+        await Assert.ThrowsAsync<FinanceNotFoundException>(async () => await transactionService.GetTransaction(id));
+    }
+
     private static async Task AddTransactionDatabase(ContextFinance context, List<Transactions> listTransaction)
     {
         var AccounntBuilder = new AccountsBuilder();
-        var listAccount = AccounntBuilder.WithDefaults().Build(3);
+        var listAccount = AccounntBuilder.CreateDefault().Build(3);
 
         await context.Accounts.AddRangeAsync(listAccount);
         await context.SaveChangesAsync();
 
         await context.Transactions.AddRangeAsync(listTransaction);
         await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
     }
 
     private static TransactionService CreateTransactionService(ContextFinance context)
     {
         var repository = new GenericRepository<Transactions>(context);
+        var accountRepository = new GenericRepository<Accounts>(context);
         var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile<TransactionMapper>()));
 
-        return new TransactionService(repository, mapper);
+        return new TransactionService(repository, accountRepository, mapper);
     }
 
     public static IEnumerable<object[]> GetTransactionFilters()
