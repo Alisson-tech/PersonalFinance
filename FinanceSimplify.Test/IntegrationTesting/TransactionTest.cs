@@ -1,12 +1,13 @@
 using AutoMapper;
 using FinanceSimplify.Context;
+using FinanceSimplify.Controllers;
 using FinanceSimplify.Data;
-using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
 using FinanceSimplify.Test.Builder;
 using FinanceSimplify.Test.IntegrationTesting.Context;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
@@ -28,7 +29,7 @@ public class TransactionTest
     {
         // Arrange
         var context = _contextTest.CreateContext();
-        var accountService = CreateTransactionService(context);
+        var transactionController = CreateTransactionController(context);
         int quantityTransactionCreateFilter = 5;
         int quantityTransactionCreateGeral = 10;
 
@@ -43,12 +44,16 @@ public class TransactionTest
             .Transactions.ToList();
 
         //Act
-        var result = await accountService!.GetTransactionList(filter, new PaginatedFilter());
+        var result = await transactionController!.GetAll(filter, new PaginatedFilter());
 
         //assert
         var totalItems = await context.Transactions.CountAsync();
-        Assert.NotNull(result);
-        Assert.Equal(quantityTransactionCreateFilter, result.TotalItems);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<PaginatedList<TransactionDto>>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(quantityTransactionCreateFilter, response.TotalItems);
         Assert.Equal(quantityTransactionCreateFilter + quantityTransactionCreateGeral, totalItems);
     }
 
@@ -57,33 +62,38 @@ public class TransactionTest
     {
         // Arrange
         var context = _contextTest.CreateContext();
-        var transactionService = CreateTransactionService(context);
+        var transactionController = CreateTransactionController(context);
         int id = 1;
         string description = "Transaction Test id";
         var data = _transactionBuilder.WithDefaults(id: id, description: description).Build(1);
         await AddTransactionDatabase(context, data);
 
         //Act
-        var result = await transactionService!.GetTransaction(id);
+        var result = await transactionController!.GetId(id);
 
         //assert
-        Assert.NotNull(result);
-        Assert.Equal(id, result.Id);
-        Assert.Equal(description, result.Description);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TransactionDto>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(id, response.Id);
+        Assert.Equal(description, response.Description);
     }
 
     [Fact]
-    public async Task GetTransactionInvalidId_ShouldReturnFinanceException()
+    public async Task GetTransactionInvalidId_ShouldReturnNotFound()
     {
         // Arrange
         var context = _contextTest.CreateContext();
-        var transactionService = CreateTransactionService(context);
+        var transactionController = CreateTransactionController(context);
         int id = 100;
         var data = _transactionBuilder.Build(10);
         await AddTransactionDatabase(context, data);
 
         //Act & assert
-        await Assert.ThrowsAsync<FinanceNotFoundException>(async () => await transactionService.GetTransaction(id));
+        var result = await transactionController!.GetId(id);
+        Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
     private static async Task AddTransactionDatabase(ContextFinance context, List<Transactions> listTransaction)
@@ -100,13 +110,14 @@ public class TransactionTest
         context.ChangeTracker.Clear();
     }
 
-    private static TransactionService CreateTransactionService(ContextFinance context)
+    private static TransactionController CreateTransactionController(ContextFinance context)
     {
         var repository = new GenericRepository<Transactions>(context);
         var accountRepository = new GenericRepository<Accounts>(context);
         var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile<TransactionMapper>()));
+        var service = new TransactionService(repository, accountRepository, mapper);
 
-        return new TransactionService(repository, accountRepository, mapper);
+        return new TransactionController(service);
     }
 
     public static IEnumerable<object[]> GetTransactionFilters()

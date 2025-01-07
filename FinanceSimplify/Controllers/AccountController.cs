@@ -17,7 +17,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AccountDto>>> GetAll([FromQuery] AccountsFilter filter, [FromQuery] PaginatedFilter page)
+    public async Task<ActionResult<PaginatedList<AccountDto>>> GetAll([FromQuery] AccountsFilter filter, [FromQuery] PaginatedFilter page)
     {
         return Ok(await _accountService.GetAccountList(filter, page));
 
@@ -41,7 +41,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult<AccountDto>> Create([FromBody] AccountCreate accountDto) 
+    public async Task<ActionResult<AccountDto>> Create([FromBody] AccountCreate accountDto)
     {
         try
         {
