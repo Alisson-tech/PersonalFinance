@@ -68,27 +68,6 @@ public class TransactionController : Controller
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<TransactionDto>> Update(int id, [FromBody] TransactionCreate TransactionDto)
-    {
-        try
-        {
-            return Ok(await _TransactionService.UpdateTransaction(id, TransactionDto));
-        }
-        catch (FinanceNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (FinanceInternalErrorException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch
-        {
-            return BadRequest("Erro interno");
-        }
-    }
-
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
