@@ -12,7 +12,7 @@ public class TransactionBuilder
     private DateTime _date = DateTime.Now;
     private string _description = "Default Transaction";
 
-    public TransactionBuilder WithDefaults(int? id = null, int? accountId = null, TransactionType? type = TransactionType.Expense, TransactionCategory? category = TransactionCategory.Debit, decimal? value = null, DateTime? date = null, string? description = null)
+    public TransactionBuilder CreateDefault(int? id = null, int? accountId = null, TransactionType? type = TransactionType.Expense, TransactionCategory? category = TransactionCategory.Debit, decimal? value = null, DateTime? date = null, string? description = null)
     {
         _id = id ?? _id;
         _accountId = accountId ?? 1;

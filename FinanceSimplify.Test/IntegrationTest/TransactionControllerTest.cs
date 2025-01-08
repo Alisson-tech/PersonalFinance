@@ -12,12 +12,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
 
-public class TransactionTest
+public class TransactionControllerTest
 {
     private readonly ContextFinanceTest _contextTest;
     private readonly TransactionBuilder _transactionBuilder;
 
-    public TransactionTest()
+    public TransactionControllerTest()
     {
         _contextTest = new ContextFinanceTest();
         _transactionBuilder = new TransactionBuilder();
@@ -35,9 +35,9 @@ public class TransactionTest
 
 
         var datafilter = _transactionBuilder
-            .WithDefaults(accountId: filter.AccountId, type: filter.Type, category: filter.Category, date: filter.DateStart, description: filter.Description)
+            .CreateDefault(accountId: filter.AccountId, type: filter.Type, category: filter.Category, date: filter.DateStart, description: filter.Description)
             .Build(quantityTransactionCreateFilter);
-        var dataGeral = _transactionBuilder.WithDefaults(id: quantityTransactionCreateFilter + 1).Build(quantityTransactionCreateGeral);
+        var dataGeral = _transactionBuilder.CreateDefault(id: quantityTransactionCreateFilter + 1).Build(quantityTransactionCreateGeral);
         var data = datafilter.Concat(dataGeral).ToList();
         await AddTransactionDatabase(context, data);
         var teste = context
@@ -65,7 +65,7 @@ public class TransactionTest
         var transactionController = CreateTransactionController(context);
         int id = 1;
         string description = "Transaction Test id";
-        var data = _transactionBuilder.WithDefaults(id: id, description: description).Build(1);
+        var data = _transactionBuilder.CreateDefault(id: id, description: description).Build(1);
         await AddTransactionDatabase(context, data);
 
         //Act
@@ -201,7 +201,7 @@ public class TransactionTest
         decimal value = 85.45M;
         var type = TransactionType.Income;
 
-        var data = _transactionBuilder.WithDefaults(id: id, accountId: accountId, value: value, type: type).Build(1);
+        var data = _transactionBuilder.CreateDefault(id: id, accountId: accountId, value: value, type: type).Build(1);
         await AddTransactionDatabase(context, data);
         var account = await context.Accounts
             .FirstAsync(a => a.Id == accountId);
@@ -230,7 +230,7 @@ public class TransactionTest
         decimal value = 85.45M;
         var type = TransactionType.Expense;
 
-        var data = _transactionBuilder.WithDefaults(id: id, accountId: accountId, value: value, type: type).Build(1);
+        var data = _transactionBuilder.CreateDefault(id: id, accountId: accountId, value: value, type: type).Build(1);
         await AddTransactionDatabase(context, data);
         var account = await context.Accounts
             .FirstAsync(a => a.Id == accountId);

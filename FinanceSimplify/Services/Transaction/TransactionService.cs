@@ -23,14 +23,13 @@ public class TransactionService : ITransactionService
 
     public async Task<TransactionDto> CreateTransaction(TransactionCreate transactionCreate)
     {
-        ValidateTransactionTypes(transactionCreate);
+        var transaction = _mapper.Map<Transactions>(transactionCreate);
+        transaction.Validate();
 
         var account = await GetAccountById(transactionCreate.AccountId);
-        CalculatorValueAccount(account, transactionCreate.Type, transactionCreate.Value);
+        account.UpdateBalance(transactionCreate.Value, transactionCreate.Type);
 
-        var Transaction = _mapper.Map<Transactions>(transactionCreate);
-
-        var createdTransaction = await _transactionRepository.Create(Transaction);
+        var createdTransaction = await _transactionRepository.Create(transaction);
 
         return _mapper.Map<TransactionDto>(createdTransaction);
     }
@@ -61,7 +60,7 @@ public class TransactionService : ITransactionService
     {
         var transaction = await _transactionRepository.GetById(id);
         var account = await GetAccountById(transaction.AccountId);
-        CalculatorValueAccount(account, transaction.Type, transaction.Value);
+        account.UpdateBalance(transaction.Value, transaction.Type);
 
         await _transactionRepository.HardDelete(id);
     }
@@ -76,30 +75,5 @@ public class TransactionService : ITransactionService
         }
 
         return account;
-    }
-
-    private static void ValidateTransactionTypes(TransactionCreate TransactionCreate)
-    {
-        if (!Enum.IsDefined(typeof(TransactionCategory), TransactionCreate.Category))
-        {
-            throw new FinanceInternalErrorException($"categoria Inválida");
-        }
-
-        if (!Enum.IsDefined(typeof(TransactionType), TransactionCreate.Type))
-        {
-            throw new FinanceInternalErrorException("tipo Inválido");
-        }
-    }
-
-    private static void CalculatorValueAccount(Accounts account, TransactionType transactionType, decimal transactionValue)
-    {
-        if (transactionType == TransactionType.Expense)
-        {
-            account.Balance -= transactionValue;
-        }
-        else
-        {
-            account.Balance += transactionValue;
-        }
     }
 }

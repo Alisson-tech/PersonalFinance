@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Test.IntegrationTesting;
 
-public class AccountTest
+public class AccountControllerTest
 {
     private readonly ContextFinanceTest _contextTest;
     private readonly AccountsBuilder _accountBuilder;
 
-    public AccountTest()
+    public AccountControllerTest()
     {
         _contextTest = new ContextFinanceTest();
         _accountBuilder = new AccountsBuilder();
