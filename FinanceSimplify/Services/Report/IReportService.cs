@@ -2,6 +2,6 @@
 
 public interface IReportService
 {
-    public Task<List<CategoryReport>> GetCategoryReport();
-    public Task<List<CategoryPercentageReport>> GetCategoryPercentage();
+    public Task<CategoryGeneralReportDto> GetCategoryGeneralReport(CategoryFilterReport filter);
+    public Task<List<CategoryPercentageReportDto>> GetCategoryPercentage(CategoryFilterReport filter);
 }
