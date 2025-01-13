@@ -44,11 +44,12 @@ public class TransactionService : ITransactionService
     public async Task<PaginatedList<TransactionDto>> GetTransactionList(TransactionFilter filter, PaginatedFilter pageFilter)
     {
         var Transactions = _transactionRepository.GetIqueryble()
-            .Where(t => (filter.AccountId == null || t.AccountId == filter.AccountId) &&
+            .Where(t =>
+                (t.Date >= filter.DateStart) &&
+                (t.Date <= filter.DateFinish) &&
+                (filter.AccountId == null || t.AccountId == filter.AccountId) &&
                 (filter.Category == null || t.Category == filter.Category) &&
-                (filter.Description == null || t.Description == filter.Description) &&
-                (filter.DateStart == null || t.Date >= filter.DateStart) &&
-                (filter.DateFinish == null || t.Date <= filter.DateFinish));
+                (filter.Description == null || t.Description == filter.Description));
 
         return await Transactions
             .OrderByDynamic(pageFilter.OrderBy, pageFilter.OrderAsc)

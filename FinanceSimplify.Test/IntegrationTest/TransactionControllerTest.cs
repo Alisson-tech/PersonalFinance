@@ -301,8 +301,6 @@ public class TransactionControllerTest
                 AccountId = 3,
                 Type = TransactionType.Income,
                 Category = TransactionCategory.Salary,
-                DateStart = null,
-                DateFinish = null,
                 Description = "Recebimento de salário"
             }
         };

@@ -1,4 +1,5 @@
 ﻿using FinanceSimplify.Data;
+using FinanceSimplify.Infrastructure;
 
 namespace FinanceSimplify.Services.Transaction;
 
@@ -23,12 +24,10 @@ public class TransactionCreate
     public DateTime Date { get; set; }
 }
 
-public class TransactionFilter
+public class TransactionFilter : BaseFilter
 {
     public int? AccountId { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionCategory? Category { get; set; }
-    public DateTime? DateStart { get; set; }
-    public DateTime? DateFinish { get; set; }
     public string? Description { get; set; }
 }
