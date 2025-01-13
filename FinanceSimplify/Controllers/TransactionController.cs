@@ -9,11 +9,11 @@ namespace FinanceSimplify.Controllers;
 [ApiController]
 public class TransactionController : Controller
 {
-    private readonly ITransactionService _TransactionService;
+    private readonly ITransactionService _transactionService;
 
     public TransactionController(ITransactionService TransactionService)
     {
-        _TransactionService = TransactionService;
+        _transactionService = TransactionService;
     }
 
     [HttpGet]
@@ -21,7 +21,7 @@ public class TransactionController : Controller
     {
         try
         {
-            return Ok(await _TransactionService.GetTransactionList(filter, page));
+            return Ok(await _transactionService.GetTransactionList(filter, page));
         }
         catch
         {
@@ -35,7 +35,7 @@ public class TransactionController : Controller
     {
         try
         {
-            return Ok(await _TransactionService.GetTransaction(id));
+            return Ok(await _transactionService.GetTransaction(id));
         }
         catch (FinanceNotFoundException ex)
         {
@@ -52,7 +52,7 @@ public class TransactionController : Controller
     {
         try
         {
-            return Ok(await _TransactionService.CreateTransaction(TransactionDto));
+            return Ok(await _transactionService.CreateTransaction(TransactionDto));
         }
         catch (FinanceInternalErrorException ex)
         {
@@ -73,7 +73,7 @@ public class TransactionController : Controller
     {
         try
         {
-            await _TransactionService.DeleteTransaction(id);
+            await _transactionService.DeleteTransaction(id);
             return Ok("Conta deletada com sucesso");
         }
         catch (FinanceNotFoundException ex)
