@@ -1,4 +1,5 @@
-﻿using FinanceSimplify.Services.Report;
+﻿using FinanceSimplify.Exceptions;
+using FinanceSimplify.Services.Report;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Controllers;
@@ -17,6 +18,17 @@ public class ReportController : Controller
     [HttpGet]
     public async Task<ActionResult<CategoryGeneralReportDto>> GetCategoryGeneralReport([FromQuery] CategoryFilterReport filter)
     {
-        throw new NotImplementedException();
+        try
+        {
+            return Ok(await _reportService.GetCategoryGeneralReport(filter));
+        }
+        catch (FinanceNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
+        }
     }
 }

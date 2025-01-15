@@ -19,7 +19,6 @@ public class CategoryGeneralReportDto
 public class CategoryReport
 {
     public TransactionCategory Category { get; set; }
-    public TransactionType TransactionType { get; set; }
     public decimal Value { get; set; }
 }
 

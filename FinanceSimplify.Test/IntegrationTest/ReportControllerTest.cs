@@ -6,7 +6,9 @@ using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Report;
 using FinanceSimplify.Test.Builder;
 using FinanceSimplify.Test.IntegrationTesting.Context;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Newtonsoft.Json;
 
 namespace FinanceSimplify.Test.IntegrationTest;
 
@@ -28,31 +30,36 @@ public class ReportControllerTest
         // Arrange
         var context = _contextTest.CreateContext();
         var transactionController = CreateReportController(context);
-        int quantityTransactionCreateFilter = 5;
-        int quantityTransactionCreateGeral = 10;
-
-
-        var datafilter = _transactionBuilder
-            .CreateDefault(accountId: filter.AccountId, type: filter.Type, category: filter.Category, date: filter.DateStart, description: filter.Description)
-            .Build(quantityTransactionCreateFilter);
-        var dataGeral = _transactionBuilder.CreateDefault(id: quantityTransactionCreateFilter + 1).Build(quantityTransactionCreateGeral);
-        var data = datafilter.Concat(dataGeral).ToList();
+        var data = _transactionBuilder.BuildRandom(20);
         await AddTransactionDatabase(context, data);
-        var teste = context
-            .Transactions.ToList();
+
+        var expected = data
+            .Where(t => (t.DateCreated >= filter.DateStart) &&
+                (t.DateCreated <= filter.DateFinish) &&
+                (filter.AccountId == null || t.AccountId == filter.AccountId) &&
+                (filter.TransactionType == null || t.Type == filter.TransactionType))
+            .GroupBy(d => d.Category).Select(group => new CategoryReport
+            {
+                Category = group.Key,
+                Value = group.Sum(t => t.Type == TransactionType.Income ? -t.Value : t.Value)
+            }).ToList();
+
+        var expectedTotal = expected.Sum(e => e.Value);
 
         //Act
-        var result = await transactionController!.GetAll(filter, new PaginatedFilter());
+        var result = await transactionController.GetCategoryGeneralReport(filter);
 
         //assert
-        var totalItems = await context.Transactions.CountAsync();
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         Assert.NotNull(okResult);
+        var response = Assert.IsAssignableFrom<CategoryGeneralReportDto>(okResult.Value);
 
-        var response = Assert.IsAssignableFrom<PaginatedList<TransactionDto>>(okResult.Value);
+        var expectedJson = JsonConvert.SerializeObject(expected.OrderBy(e => e.Category));
+        var responseJson = JsonConvert.SerializeObject(response.CategoryReports.OrderBy(e => e.Category));
+
         Assert.NotNull(response);
-        Assert.Equal(quantityTransactionCreateFilter, response.TotalItems);
-        Assert.Equal(quantityTransactionCreateFilter + quantityTransactionCreateGeral, totalItems);
+        Assert.Equal(expectedJson, responseJson);
+        Assert.Equal(response.TotalValue, expectedTotal);
     }
 
     public static IEnumerable<object[]> GetTransactionFilters()
@@ -61,7 +68,7 @@ public class ReportControllerTest
         {
          new CategoryFilterReport
          {
-             AccountId = 3,
+             AccountId = 1,
              TransactionType = TransactionType.Expense,
          }
         };

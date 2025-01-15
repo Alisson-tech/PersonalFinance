@@ -25,6 +25,28 @@ public class TransactionBuilder
         return this;
     }
 
+    public List<Transactions> BuildRandom(int quantity)
+    {
+        var random = new Random();
+        var transactionsList = new List<Transactions>();
+
+        for (int i = 0; i < quantity; i++)
+        {
+            transactionsList.Add(new Transactions
+            {
+                Id = _id + i,
+                AccountId = (int)random.Next(1, 2),
+                Type = (TransactionType)random.Next(0, Enum.GetValues(typeof(TransactionType)).Length),
+                Category = (TransactionCategory)random.Next(0, Enum.GetValues(typeof(TransactionCategory)).Length),
+                Value = Math.Round((decimal)random.NextDouble() * 1000, 2),
+                Description = $"Random Transaction {i + 1}",
+                Date = DateTime.Now,
+            });
+        }
+
+        return transactionsList;
+    }
+
     public List<Transactions> Build(int quantity)
     {
         var transactionsList = new List<Transactions>();
