@@ -27,7 +27,7 @@ public class ReportService : IReportService
             .Select(group => new CategoryReport
             {
                 Category = group.Key,
-                Value = group.Sum(t => t.Type == TransactionType.Income ? -t.Value : t.Value)
+                Value = group.Sum(t => t.Type == TransactionType.Expense ? -t.Value : t.Value)
             }).ToListAsync();
 
         return new CategoryGeneralReportDto
@@ -36,8 +36,23 @@ public class ReportService : IReportService
         };
     }
 
-    public Task<List<CategoryPercentageReportDto>> GetCategoryPercentage(CategoryFilterReport filter)
+    public async Task<List<CategoryPercentageReportDto>> GetCategoryPercentage(CategoryFilterReport filter)
     {
-        throw new NotImplementedException();
+        filter.ValidateTransactionTypeNotNull();
+
+        var query = _transactionRepository.GetIqueryble()
+            .Where(t => (t.DateCreated >= filter.DateStart) &&
+                (t.DateCreated <= filter.DateFinish) &&
+                (filter.AccountId == null || t.AccountId == filter.AccountId) &&
+                (filter.TransactionType == null || t.Type == filter.TransactionType));
+
+        var totalValue = await query.SumAsync(t => t.Value);
+
+        return await query.GroupBy(t => t.Category)
+            .Select(group => new CategoryPercentageReportDto
+            {
+                Category = group.Key,
+                Percentage = totalValue > 0 ? group.Sum(t => t.Value) / totalValue : 0
+            }).ToListAsync();
     }
 }

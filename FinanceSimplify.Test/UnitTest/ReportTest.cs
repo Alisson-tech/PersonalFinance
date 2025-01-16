@@ -17,7 +17,7 @@ public class ReportTest
         };
 
         // Act
-        var exception = Record.Exception(() => categoryFilter.ValidateTransactionType());
+        var exception = Record.Exception(() => categoryFilter.ValidateTransactionTypeNotNull());
 
         // Assert
         Assert.Null(exception);
@@ -34,7 +34,7 @@ public class ReportTest
         };
 
         // Act
-        var exception = Record.Exception(() => categoryFilter.ValidateTransactionType());
+        var exception = Record.Exception(() => categoryFilter.ValidateTransactionTypeNotNull());
 
         // Assert
         Assert.IsType<FinanceInternalErrorException>(exception);

@@ -25,7 +25,7 @@ public class ReportControllerTest
 
     [Theory]
     [MemberData(nameof(GetTransactionFilters))]
-    public async Task GetCategoryReportsWithFilter_ShouldReturnCorrectValues(CategoryFilterReport filter)
+    public async Task GetCategoryReportsWithFilter_ShouldReturnCorrectCategoryValues(CategoryFilterReport filter)
     {
         // Arrange
         var context = _contextTest.CreateContext();
@@ -41,7 +41,7 @@ public class ReportControllerTest
             .GroupBy(d => d.Category).Select(group => new CategoryReport
             {
                 Category = group.Key,
-                Value = group.Sum(t => t.Type == TransactionType.Income ? -t.Value : t.Value)
+                Value = group.Sum(t => t.Type == TransactionType.Expense ? -t.Value : t.Value)
             }).ToList();
 
         var expectedTotal = expected.Sum(e => e.Value);
@@ -60,6 +60,68 @@ public class ReportControllerTest
         Assert.NotNull(response);
         Assert.Equal(expectedJson, responseJson);
         Assert.Equal(response.TotalValue, expectedTotal);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetTransactionFiltersPercentage))]
+    public async Task GetCategoryPercentageReportsWithFilter_ShouldReturnCorrectPercentageCategory(CategoryFilterReport filter)
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateReportController(context);
+        var data = _transactionBuilder.BuildRandom(20);
+        await AddTransactionDatabase(context, data);
+
+        var query = data
+            .Where(t => (t.DateCreated >= filter.DateStart) &&
+                (t.DateCreated <= filter.DateFinish) &&
+                (filter.AccountId == null || t.AccountId == filter.AccountId) &&
+                (filter.TransactionType == null || t.Type == filter.TransactionType));
+
+        var total = query.Sum(t => t.Value);
+
+        var expected = query
+            .GroupBy(d => d.Category).Select(group => new CategoryPercentageReportDto
+            {
+                Category = group.Key,
+                Percentage = total > 0 ? group.Sum(t => t.Value) / total : 0,
+            }).ToList();
+
+        //Act
+        var result = await transactionController.GetCategoryPercentageValueGeneralReport(filter);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+        var response = Assert.IsAssignableFrom<List<CategoryPercentageReportDto>>(okResult.Value);
+
+        var expectedJson = JsonConvert.SerializeObject(expected.OrderBy(e => e.Category));
+        var responseJson = JsonConvert.SerializeObject(response.OrderBy(e => e.Category));
+
+        Assert.NotNull(response);
+        Assert.Equal(expectedJson, responseJson);
+    }
+
+    [Fact]
+    public async Task GetCategoryPercentageReportsCategoryFilterNull_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var context = _contextTest.CreateContext();
+        var transactionController = CreateReportController(context);
+        var data = _transactionBuilder.BuildRandom(20);
+        await AddTransactionDatabase(context, data);
+
+        var filter = new CategoryFilterReport
+        {
+            TransactionType = null
+        };
+
+
+        //Act
+        var result = await transactionController.GetCategoryPercentageValueGeneralReport(filter);
+
+        //assert
+        Assert.IsType<BadRequestObjectResult>(result.Result);
     }
 
     public static IEnumerable<object[]> GetTransactionFilters()
@@ -90,6 +152,36 @@ public class ReportControllerTest
          {
              AccountId = null,
              TransactionType = null,
+         }
+        };
+    }
+
+    public static IEnumerable<object[]> GetTransactionFiltersPercentage()
+    {
+        yield return new object[]
+        {
+         new CategoryFilterReport
+         {
+             TransactionType = TransactionType.Expense,
+         }
+        };
+
+        yield return new object[]
+        {
+         new CategoryFilterReport
+         {
+             TransactionType = TransactionType.Income,
+         }
+        };
+
+        yield return new object[]
+        {
+         new CategoryFilterReport
+         {
+             AccountId = 2,
+             TransactionType = TransactionType.Income,
+             DateStart = DateTime.Now.AddDays(-10),
+             DateFinish = DateTime.Now.AddDays(-2),
          }
         };
     }

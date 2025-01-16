@@ -15,12 +15,29 @@ public class ReportController : Controller
         _reportService = reportService;
     }
 
-    [HttpGet]
+    [HttpGet("Category/General")]
     public async Task<ActionResult<CategoryGeneralReportDto>> GetCategoryGeneralReport([FromQuery] CategoryFilterReport filter)
     {
         try
         {
             return Ok(await _reportService.GetCategoryGeneralReport(filter));
+        }
+        catch (FinanceNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
+        }
+    }
+
+    [HttpGet("Category/Percentage")]
+    public async Task<ActionResult<CategoryPercentageReportDto>> GetCategoryPercentageValueGeneralReport([FromQuery] CategoryFilterReport filter)
+    {
+        try
+        {
+            return Ok(await _reportService.GetCategoryPercentage(filter));
         }
         catch (FinanceNotFoundException ex)
         {
