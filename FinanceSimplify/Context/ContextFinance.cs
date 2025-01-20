@@ -31,6 +31,10 @@ public class ContextFinance : DbContext
         modelBuilder.Entity<Accounts>()
             .HasQueryFilter(a => a.DateDeleted == null);
 
+        modelBuilder.Entity<Users>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
     }
 
     public override int SaveChanges()
