@@ -15,6 +15,7 @@ builder.Services.AddDbContext<ContextFinance>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddDbContext<ContextFinance>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
