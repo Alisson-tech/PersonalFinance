@@ -4,8 +4,12 @@ using FinanceSimplify.Controllers;
 using FinanceSimplify.Data;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
+using FinanceSimplify.Services.User;
 using FinanceSimplify.Test.IntegrationTest.Context;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace FinanceSimplify.Test.IntegrationTest;
 
@@ -100,8 +104,12 @@ public class UserControllerTest
         Assert.NotNull(okResult);
 
         var response = Assert.IsAssignableFrom<TokenDto>(okResult.Value);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var decodedToken = tokenHandler.ReadJwtToken(response.Token);
 
         Assert.NotNull(response);
+        Assert.Contains(decodedToken.Claims, c => c.Value == email);
+        Assert.IsType<Guid>(Guid.Parse(response.RefreshToken));
     }
 
     [Theory]
@@ -136,9 +144,17 @@ public class UserControllerTest
 
     private static UserController GetUserController(ContextFinance context)
     {
+        var cache = new MemoryCache(new MemoryCacheOptions());
+        var configuration = new ConfigurationBuilder()
+        .SetBasePath(AppContext.BaseDirectory)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .Build();
+
         var userRepository = new GenericRepository<Users>(context);
         var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile<UserMapper>()));
-        var service = new UserService(userRepository, mapper);
+        var tokenGenerate = new TokenGenerate(configuration, cache);
+
+        var service = new UserService(userRepository, mapper, tokenGenerate);
 
         return new UserController(service);
     }
