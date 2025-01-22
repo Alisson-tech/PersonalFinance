@@ -33,7 +33,6 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(x =>
 {
     var jwtSettings = builder.Configuration.GetSection("Jwt");
-    var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
