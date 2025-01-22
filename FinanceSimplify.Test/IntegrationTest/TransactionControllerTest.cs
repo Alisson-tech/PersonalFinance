@@ -6,11 +6,11 @@ using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
 using FinanceSimplify.Test.Builder;
-using FinanceSimplify.Test.IntegrationTesting.Context;
+using FinanceSimplify.Test.IntegrationTest.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceSimplify.Test.IntegrationTesting;
+namespace FinanceSimplify.Test.IntegrationTest;
 
 public class TransactionControllerTest
 {

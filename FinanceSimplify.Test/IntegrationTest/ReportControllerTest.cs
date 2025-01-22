@@ -5,7 +5,7 @@ using FinanceSimplify.Data;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Report;
 using FinanceSimplify.Test.Builder;
-using FinanceSimplify.Test.IntegrationTesting.Context;
+using FinanceSimplify.Test.IntegrationTest.Context;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;

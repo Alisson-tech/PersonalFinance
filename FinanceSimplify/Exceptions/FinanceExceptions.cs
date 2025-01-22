@@ -1,20 +1,14 @@
 ﻿namespace FinanceSimplify.Exceptions;
 
 
-public class FinanceNotFoundException : Exception
+public class FinanceNotFoundException(string message) : Exception(message)
 {
-    public FinanceNotFoundException(string message) : base(message)
-    {
-    }
 }
 
-public class FinanceInternalErrorException : Exception
+public class FinanceInternalErrorException(string message) : Exception(message)
 {
-    public FinanceInternalErrorException(string message) : base(message)
-    {
-    }
+}
 
-    public FinanceInternalErrorException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
+public class FinanceUnauthorizedException(string message) : Exception(message)
+{
 }

@@ -6,10 +6,10 @@ using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Account;
 using FinanceSimplify.Test.Builder;
-using FinanceSimplify.Test.IntegrationTesting.Context;
+using FinanceSimplify.Test.IntegrationTest.Context;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FinanceSimplify.Test.IntegrationTesting;
+namespace FinanceSimplify.Test.IntegrationTest;
 
 public class AccountControllerTest
 {

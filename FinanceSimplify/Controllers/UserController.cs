@@ -32,4 +32,21 @@ public class UserController : Controller
         }
 
     }
+
+    [HttpPost]
+    public async Task<ActionResult<TokenDto>> Login([FromBody] UserLogin userLongin)
+    {
+        try
+        {
+            return Ok(await _userService.Login(userLongin));
+        }
+        catch (FinanceUnauthorizedException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch
+        {
+            return BadRequest("Erro interno");
+        }
+    }
 }

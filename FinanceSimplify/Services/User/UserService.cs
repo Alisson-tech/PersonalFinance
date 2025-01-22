@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using FinanceSimplify.Data;
+using FinanceSimplify.Exceptions;
 using FinanceSimplify.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceSimplify.Services.Transaction;
 
@@ -15,14 +17,30 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public Task<string> CreateUser(UserCreate user)
+    public async Task<string> CreateUser(UserCreate userCreate)
     {
-        throw new NotImplementedException();
+        var user = _mapper.Map<Users>(userCreate);
+
+        user.Validate();
+
+        var userResult = await _userRepository.Create(user);
+
+        return userResult.Name;
     }
 
-    public Task<TokenDto> Login(UserLogin user)
+    public async Task<TokenDto> Login(UserLogin userLogin)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetIqueryble()
+            .Where(u => u.Email == userLogin.Email && u.Password == userLogin.Password).FirstOrDefaultAsync();
+
+        if (user == null)
+            throw new FinanceUnauthorizedException("Login inválido");
+
+        return new TokenDto()
+        {
+            Token = "teste",
+            RefreshToken = "teste"
+        };
     }
 
     public Task<TokenDto> Refresh(string tokenRefresh)

@@ -4,7 +4,7 @@ using FinanceSimplify.Controllers;
 using FinanceSimplify.Data;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
-using FinanceSimplify.Test.IntegrationTesting.Context;
+using FinanceSimplify.Test.IntegrationTest.Context;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Test.IntegrationTest;
@@ -18,20 +18,18 @@ public class UserControllerTest
         _contextTest = new ContextFinanceTest();
     }
 
-
-    // teste create user
     [Fact]
     public async Task CreateValidUser_ShouldReturnNameUser()
     {
         // arrange
         var context = _contextTest.CreateContext();
         var userController = GetUserController(context);
-        var nameAccount = "new account";
+        var UserName = "new account";
 
         var userCreate = new UserCreate()
         {
             Email = "new@gmail.com",
-            Name = nameAccount,
+            Name = UserName,
             Password = "password123",
         };
 
@@ -45,7 +43,7 @@ public class UserControllerTest
         var response = Assert.IsAssignableFrom<string>(okResult.Value);
 
         Assert.NotNull(response);
-        Assert.Equal(response, nameAccount);
+        Assert.Equal(response, UserName);
     }
 
     [Theory]
@@ -70,12 +68,71 @@ public class UserControllerTest
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
 
+    [Fact]
+    public async Task LoginUser_ShouldReturnToken()
+    {
+        // arrange
+        var context = _contextTest.CreateContext();
+        var userController = GetUserController(context);
+        var email = "new@gmail.com";
+        var password = "password123";
 
-    //teste create invalid user
+        var userCreate = new Users()
+        {
+            Email = email,
+            Name = "teste",
+            Password = password,
+        };
 
-    // teste login
+        await context.AddAsync(userCreate);
+        await context.SaveChangesAsync();
 
-    // teste invalid login
+        //act
+        var userLogin = new UserLogin
+        {
+            Email = email,
+            Password = password
+        };
+        var result = await userController.Login(userLogin);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TokenDto>(okResult.Value);
+
+        Assert.NotNull(response);
+    }
+
+    [Theory]
+    [InlineData("new@gmail.com", "")]
+    [InlineData("", "password123")]
+    public async Task LoginInvalidUser_ShouldReturnUnauthorized(string email, string password)
+    {
+        // arrange
+        var context = _contextTest.CreateContext();
+        var userController = GetUserController(context);
+
+        var userCreate = new Users()
+        {
+            Email = "new@gmail.com",
+            Name = "teste",
+            Password = "password123",
+        };
+
+        await context.AddAsync(userCreate);
+
+        //act
+        var userLogin = new UserLogin
+        {
+            Email = email,
+            Password = password
+        };
+        var result = await userController.Login(userLogin);
+
+        //assert
+        Assert.IsType<UnauthorizedObjectResult>(result.Result);
+    }
 
     private static UserController GetUserController(ContextFinance context)
     {
