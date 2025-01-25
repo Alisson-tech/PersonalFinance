@@ -6,10 +6,13 @@ using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Transaction;
 using FinanceSimplify.Services.User;
 using FinanceSimplify.Test.IntegrationTest.Context;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Moq;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace FinanceSimplify.Test.IntegrationTest;
 
@@ -27,7 +30,8 @@ public class UserControllerTest
     {
         // arrange
         var context = _contextTest.CreateContext();
-        var userController = GetUserController(context);
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
         var UserName = "new account";
 
         var userCreate = new UserCreate()
@@ -58,7 +62,8 @@ public class UserControllerTest
     {
         // arrange
         var context = _contextTest.CreateContext();
-        var userController = GetUserController(context);
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
 
         var userCreate = new UserCreate()
         {
@@ -77,7 +82,8 @@ public class UserControllerTest
     {
         // arrange
         var context = _contextTest.CreateContext();
-        var userController = GetUserController(context);
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
         var email = "new@gmail.com";
         var password = "password123";
 
@@ -119,7 +125,8 @@ public class UserControllerTest
     {
         // arrange
         var context = _contextTest.CreateContext();
-        var userController = GetUserController(context);
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
 
         var userCreate = new Users()
         {
@@ -142,9 +149,63 @@ public class UserControllerTest
         Assert.IsType<UnauthorizedObjectResult>(result.Result);
     }
 
-    private static UserController GetUserController(ContextFinance context)
+    [Fact]
+    public void RefreshTokenValid_ShouldReturnTokenDto()
     {
-        var cache = new MemoryCache(new MemoryCacheOptions());
+        // arrange
+        var email = "teste@gmail.com";
+        var name = "teste";
+        var httpContext = GetHttpContext(email, name);
+
+        var context = _contextTest.CreateContext();
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
+        userController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
+
+        string refreshToken = Guid.NewGuid().ToString();
+        cache.Set($"refreshToken_{email}_{refreshToken}", refreshToken, TimeSpan.FromMinutes(5));
+
+        // Act
+        var result = userController.Refresh(refreshToken);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+
+        var response = Assert.IsAssignableFrom<TokenDto>(okResult.Value);
+
+        Assert.NotNull(response);
+        Assert.IsType<Guid>(Guid.Parse(response.RefreshToken));
+        Assert.NotEqual(refreshToken, response.RefreshToken);
+
+    }
+
+    [Fact]
+    public void RefreshTokenInvalid_ShouldReturnUnauthorized()
+    {
+        // arrange
+        var email = "teste@gmail.com";
+        var name = "teste";
+        var httpContext = GetHttpContext(email, name);
+
+        var context = _contextTest.CreateContext();
+        var cache = GetMemoryCache();
+        var userController = GetUserController(context, cache);
+        userController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
+
+        string refreshToken = Guid.NewGuid().ToString();
+
+        // Act
+        var result = userController.Refresh(refreshToken);
+
+        //assert
+        Assert.IsType<UnauthorizedObjectResult>(result.Result);
+
+    }
+
+    private static UserController GetUserController(ContextFinance context, MemoryCache memoryCache)
+    {
+        var cache = memoryCache;
         var configuration = new ConfigurationBuilder()
         .SetBasePath(AppContext.BaseDirectory)
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -157,5 +218,27 @@ public class UserControllerTest
         var service = new UserService(userRepository, mapper, tokenGenerate);
 
         return new UserController(service);
+    }
+
+    private static MemoryCache GetMemoryCache()
+    {
+        return new MemoryCache(new MemoryCacheOptions());
+    }
+
+    private static HttpContext GetHttpContext(string email, string name)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Name, name)
+        };
+
+        var identity = new ClaimsIdentity(claims, "TestAuthentication");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        var mockHttpContext = new Mock<HttpContext>();
+        mockHttpContext.Setup(context => context.User).Returns(claimsPrincipal);
+
+        return mockHttpContext.Object;
     }
 }

@@ -1,10 +1,12 @@
 ﻿using FinanceSimplify.Exceptions;
 using FinanceSimplify.Services.Report;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class ReportController : Controller
 {

@@ -1,11 +1,13 @@
 ﻿using FinanceSimplify.Exceptions;
 using FinanceSimplify.Infraestructure;
 using FinanceSimplify.Services.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSimplify.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class AccountController : Controller
 {

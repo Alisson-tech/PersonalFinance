@@ -55,10 +55,10 @@ public class TokenTest
     public void GenerateRefreshToken_ShouldReturnRefreshToken()
     {
         // Arrange
-        var userId = "testUserId";
+        var userEmail = "test@gmail.com";
 
         // Act
-        var refreshToken = _tokenGenerate.GenerateRefreshToken(userId);
+        var refreshToken = _tokenGenerate.GenerateRefreshToken(userEmail);
 
         // Assert
         Assert.NotNull(refreshToken);
@@ -70,14 +70,14 @@ public class TokenTest
     public void ValidateValidRefreshToken_ShouldReturnTrue()
     {
         // Arrange
-        var userId = "testUserId";
+        var userEmail = "test@gmail.com";
         var refreshToken = Guid.NewGuid().ToString();
-        var cacheKey = $"refreshToken:{userId}:{refreshToken}";
+        var cacheKey = $"refreshToken_{userEmail}_{refreshToken}";
 
         _mockCache.Set(cacheKey, refreshToken);
 
         // Act
-        var result = _tokenGenerate.ValidateRefreshToken(userId, refreshToken);
+        var result = _tokenGenerate.ValidateRefreshToken(userEmail, refreshToken);
 
         // Assert
         Assert.True(result);
@@ -87,12 +87,12 @@ public class TokenTest
     public void ValidateInvalidRefreshToken_ShouldReturnFalse()
     {
         // Arrange
-        var userId = "testUserId";
+        var userEmail = "test@gmail.com";
         var refreshToken = "invalidRefreshToken";
-        var cacheKey = $"refreshToken:{userId}:{refreshToken}";
+        var cacheKey = $"refreshToken:{userEmail}:{refreshToken}";
 
         // Act
-        var result = _tokenGenerate.ValidateRefreshToken(userId, refreshToken);
+        var result = _tokenGenerate.ValidateRefreshToken(userEmail, refreshToken);
 
         // Assert
         Assert.False(result);

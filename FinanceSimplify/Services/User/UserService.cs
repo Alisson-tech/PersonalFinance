@@ -40,15 +40,23 @@ public class UserService : IUserService
         if (user == null)
             throw new FinanceUnauthorizedException("Login inválido");
 
-        return CreateToken(user.Id.ToString(), user.Name, user.Email);
+        return CreateToken(user.Name, user.Email);
     }
 
-    public Task<TokenDto> Refresh(string tokenRefresh)
+    public TokenDto RefreshToken(string? username, string? email, string tokenRefresh)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email))
+            throw new FinanceUnauthorizedException("Acesso não autorizado");
+
+        var validRefreshToken = _tokenGenerate.ValidateRefreshToken(email, tokenRefresh);
+
+        if (!validRefreshToken)
+            throw new FinanceUnauthorizedException("Token Inválido");
+
+        return CreateToken(username, email);
     }
 
-    private TokenDto CreateToken(string userId, string name, string email)
+    private TokenDto CreateToken(string name, string email)
     {
         List<Claim> claims = new List<Claim>
         {
@@ -59,7 +67,7 @@ public class UserService : IUserService
         return new TokenDto()
         {
             Token = _tokenGenerate.GenerateAccessToken(claims),
-            RefreshToken = _tokenGenerate.GenerateRefreshToken(userId)
+            RefreshToken = _tokenGenerate.GenerateRefreshToken(email)
         };
     }
 }

@@ -39,10 +39,10 @@ public class TokenGenerate
         return tokenHandler.WriteToken(token);
     }
 
-    public string GenerateRefreshToken(string userId)
+    public string GenerateRefreshToken(string userEmail)
     {
         var refreshToken = Guid.NewGuid().ToString();
-        var cacheKey = $"refreshToken:{userId}:{refreshToken}";
+        var cacheKey = $"refreshToken_{userEmail}_{refreshToken}";
 
         _cache.Set(cacheKey, refreshToken, new MemoryCacheEntryOptions
         {
@@ -52,9 +52,9 @@ public class TokenGenerate
         return refreshToken;
     }
 
-    public bool ValidateRefreshToken(string userId, string refreshToken)
+    public bool ValidateRefreshToken(string userEmail, string refreshToken)
     {
-        var cacheKey = $"refreshToken:{userId}:{refreshToken}";
+        var cacheKey = $"refreshToken_{userEmail}_{refreshToken}";
         var cachedValue = _cache.Get(cacheKey)?.ToString();
 
         if (cachedValue == refreshToken)
