@@ -1,7 +1,6 @@
 ﻿using FinanceSimplify.Exceptions;
 using FinanceSimplify.Services.Transaction;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FinanceSimplify.Controllers;
 
@@ -56,10 +55,9 @@ public class UserController : Controller
     {
         try
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var name = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var accessToken = Request.Headers["Authorization"];
 
-            return Ok(_userService.RefreshToken(name, email, refreshToken));
+            return Ok(_userService.RefreshToken(refreshToken, accessToken));
         }
         catch (FinanceUnauthorizedException ex)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using FinanceSimplify.Exceptions;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -50,6 +51,25 @@ public class TokenGenerate
         });
 
         return refreshToken;
+    }
+
+    public (string, string) GetUsernameAndEmail(string? accessToken)
+    {
+        if (string.IsNullOrEmpty(accessToken) || !accessToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            throw new FinanceUnauthorizedException("Acesso não autorizado");
+
+        var token = accessToken.Substring("Bearer ".Length).Trim();
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+
+        var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email" || c.Type == ClaimTypes.Email)?.Value;
+        var name = jwtToken.Claims.FirstOrDefault(c => c.Type == "unique_name" || c.Type == ClaimTypes.Name)?.Value;
+
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(name))
+            throw new FinanceUnauthorizedException("Acesso não autorizado");
+
+        return (name, email);
     }
 
     public bool ValidateRefreshToken(string userEmail, string refreshToken)

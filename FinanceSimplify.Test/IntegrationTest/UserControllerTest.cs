@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace FinanceSimplify.Test.IntegrationTest;
 
@@ -155,7 +157,7 @@ public class UserControllerTest
         // arrange
         var email = "teste@gmail.com";
         var name = "teste";
-        var httpContext = GetHttpContext(email, name);
+        var httpContext = GetHttpContext(name, email);
 
         var context = _contextTest.CreateContext();
         var cache = GetMemoryCache();
@@ -191,6 +193,7 @@ public class UserControllerTest
         var context = _contextTest.CreateContext();
         var cache = GetMemoryCache();
         var userController = GetUserController(context, cache);
+
         userController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
 
         string refreshToken = Guid.NewGuid().ToString();
@@ -225,19 +228,32 @@ public class UserControllerTest
         return new MemoryCache(new MemoryCacheOptions());
     }
 
-    private static HttpContext GetHttpContext(string email, string name)
+    private static HttpContext GetHttpContext(string username, string email)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Name, name)
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Email, email)
         };
 
-        var identity = new ClaimsIdentity(claims, "TestAuthentication");
-        var claimsPrincipal = new ClaimsPrincipal(identity);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("tested54a6aa74da7ad+#$dalsdla=dlsda"));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddMinutes(5),
+            signingCredentials: creds
+        );
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var accessToken = tokenHandler.WriteToken(token);
+
+        var mockRequest = new Mock<HttpRequest>();
+        mockRequest.Setup(r => r.Headers["Authorization"]).Returns($"Bearer {accessToken}");
 
         var mockHttpContext = new Mock<HttpContext>();
-        mockHttpContext.Setup(context => context.User).Returns(claimsPrincipal);
+        mockHttpContext.Setup(context => context.Request).Returns(mockRequest.Object);
+
 
         return mockHttpContext.Object;
     }

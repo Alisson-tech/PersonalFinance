@@ -43,12 +43,11 @@ public class UserService : IUserService
         return CreateToken(user.Name, user.Email);
     }
 
-    public TokenDto RefreshToken(string? username, string? email, string tokenRefresh)
+    public TokenDto RefreshToken(string refreshToken, string? accessToken)
     {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email))
-            throw new FinanceUnauthorizedException("Acesso não autorizado");
+        var (username, email) = _tokenGenerate.GetUsernameAndEmail(accessToken);
 
-        var validRefreshToken = _tokenGenerate.ValidateRefreshToken(email, tokenRefresh);
+        var validRefreshToken = _tokenGenerate.ValidateRefreshToken(email, refreshToken);
 
         if (!validRefreshToken)
             throw new FinanceUnauthorizedException("Token Inválido");
