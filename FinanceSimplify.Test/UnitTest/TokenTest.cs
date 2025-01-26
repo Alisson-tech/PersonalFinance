@@ -1,4 +1,5 @@
-﻿using FinanceSimplify.Services.User;
+﻿using FinanceSimplify.Exceptions;
+using FinanceSimplify.Services.User;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -89,12 +90,63 @@ public class TokenTest
         // Arrange
         var userEmail = "test@gmail.com";
         var refreshToken = "invalidRefreshToken";
-        var cacheKey = $"refreshToken:{userEmail}:{refreshToken}";
+        var cacheKey = $"refreshToken_{userEmail}_{refreshToken}";
 
         // Act
         var result = _tokenGenerate.ValidateRefreshToken(userEmail, refreshToken);
 
         // Assert
         Assert.False(result);
+    }
+
+    [Fact]
+    public void GetUsernameAndEmailValidToken_ReturnsNameAndEmail()
+    {
+        // Arrange
+        var email = "test@example.com";
+        var name = "Test User";
+        var accessToken = $"Bearer {GenerateValidJwtToken(email, name)}";
+
+
+        // Act
+        var (resultName, resultEmail) = _tokenGenerate.GetUsernameAndEmail(accessToken);
+
+        // Assert
+        Assert.Equal(name, resultName);
+        Assert.Equal(email, resultEmail);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("InvalidToken")]
+    public void GetUsernameAndEmailInvalidToken_ReturnUnauthorizedException(string? accessToken)
+    {
+        // Act & Assert
+        Assert.Throws<FinanceUnauthorizedException>(() => _tokenGenerate.GetUsernameAndEmail(accessToken));
+    }
+
+    [Fact]
+    public void GetUsernameAndEmailInvalidClaims_ThrowsFinanceUnauthorizedException()
+    {
+        // Arrange
+        var securityToken = new JwtSecurityToken();
+        var invalidToken = new JwtSecurityTokenHandler().WriteToken(securityToken);
+        var invalidAccessToken = $"Bearer {invalidToken}";
+
+        // Act & Assert
+        Assert.Throws<FinanceUnauthorizedException>(() => _tokenGenerate.GetUsernameAndEmail(invalidAccessToken));
+    }
+
+    private string GenerateValidJwtToken(string email, string name)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, name),
+            new Claim(ClaimTypes.Email, email)
+        };
+
+        var securityToken = new JwtSecurityToken(claims: claims);
+        return new JwtSecurityTokenHandler().WriteToken(securityToken);
     }
 }
