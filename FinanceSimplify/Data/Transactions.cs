@@ -1,4 +1,5 @@
 ﻿using FinanceSimplify.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinanceSimplify.Data;
 
@@ -35,19 +36,35 @@ public class Transactions : BaseEntity
 
 public enum TransactionType
 {
+    [Display(Name = "Despesas")]
     Expense,
+    [Display(Name = "Receita")]
     Income
 }
 
 public enum TransactionCategory
 {
+    [Display(Name = "Salário")]
     Salary,
+
+    [Display(Name = "Débito")]
     Debit,
 
+    [Display(Name = "iFood")]
     IFood,
+
+    [Display(Name = "Casa")]
     Home,
+
+    [Display(Name = "Uber")]
     Uber,
+
+    [Display(Name = "Eletricidade")]
     Electricity,
+
+    [Display(Name = "Água")]
     Water,
+
+    [Display(Name = "Imposto")]
     Tax
 }

@@ -6,7 +6,7 @@ namespace FinanceSimplify.Services.Report;
 
 public class CategoryPercentageReportDto
 {
-    public TransactionCategory Category { get; set; }
+    public string Category { get; set; } = String.Empty;
     public decimal Percentage { get; set; }
 }
 
@@ -18,7 +18,7 @@ public class CategoryGeneralReportDto
 
 public class CategoryReport
 {
-    public TransactionCategory Category { get; set; }
+    public string Category { get; set; } = String.Empty;
     public decimal Value { get; set; }
 }
 

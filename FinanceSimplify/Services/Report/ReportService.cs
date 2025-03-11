@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FinanceSimplify.Data;
+using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +27,7 @@ public class ReportService : IReportService
             .GroupBy(t => t.Category)
             .Select(group => new CategoryReport
             {
-                Category = group.Key,
+                Category = group.Key.GetDisplayName(),
                 Value = group.Sum(t => t.Type == TransactionType.Expense ? -t.Value : t.Value)
             }).ToListAsync();
 
@@ -51,7 +52,7 @@ public class ReportService : IReportService
         return await query.GroupBy(t => t.Category)
             .Select(group => new CategoryPercentageReportDto
             {
-                Category = group.Key,
+                Category = group.Key.GetDisplayName(),
                 Percentage = totalValue > 0 ? group.Sum(t => t.Value) / totalValue : 0
             }).ToListAsync();
     }

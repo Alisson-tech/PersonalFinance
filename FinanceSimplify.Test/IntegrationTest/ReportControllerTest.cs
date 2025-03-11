@@ -2,6 +2,7 @@
 using FinanceSimplify.Context;
 using FinanceSimplify.Controllers;
 using FinanceSimplify.Data;
+using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Report;
 using FinanceSimplify.Test.Builder;
@@ -40,7 +41,7 @@ public class ReportControllerTest
                 (filter.TransactionType == null || t.Type == filter.TransactionType))
             .GroupBy(d => d.Category).Select(group => new CategoryReport
             {
-                Category = group.Key,
+                Category = group.Key.GetDisplayName(),
                 Value = group.Sum(t => t.Type == TransactionType.Expense ? -t.Value : t.Value)
             }).ToList();
 
@@ -83,7 +84,7 @@ public class ReportControllerTest
         var expected = query
             .GroupBy(d => d.Category).Select(group => new CategoryPercentageReportDto
             {
-                Category = group.Key,
+                Category = group.Key.GetDisplayName(),
                 Percentage = total > 0 ? group.Sum(t => t.Value) / total : 0,
             }).ToList();
 

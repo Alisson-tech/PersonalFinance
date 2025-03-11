@@ -1,6 +1,6 @@
-﻿using AutoMapper.QueryableExtensions;
-using FinanceSimplify.Infraestructure;
+﻿using FinanceSimplify.Infraestructure;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace FinanceSimplify.Infrastructure;
@@ -38,5 +38,15 @@ public static class QueryExtension
 
         return query.Provider.CreateQuery<T>(resultExpression);
     }
+    public static string GetDisplayName(this Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+
+        if (field == null)
+            return "";
+
+        var attribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
+
+        return attribute?.Name ?? value.ToString();
+    }
 }
-    
