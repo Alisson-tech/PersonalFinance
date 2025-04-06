@@ -32,8 +32,6 @@ public enum AccountType
     CreditCard,
     [Display(Name = "Débito")]
     DebitCard,
-    [Display(Name = "Pix")]
-    Pix,
     [Display(Name = "Voucher Alimentação")]
     FoodVoucher,
     [Display(Name = "Poupança")]
