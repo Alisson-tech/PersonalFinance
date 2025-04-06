@@ -3,6 +3,7 @@ using FinanceSimplify.Context;
 using FinanceSimplify.Controllers;
 using FinanceSimplify.Data;
 using FinanceSimplify.Infraestructure;
+using FinanceSimplify.Infrastructure;
 using FinanceSimplify.Repositories;
 using FinanceSimplify.Services.Account;
 using FinanceSimplify.Test.Builder;
@@ -47,7 +48,7 @@ public class AccountControllerTest
         var response = Assert.IsAssignableFrom<PaginatedList<AccountDto>>(okResult.Value);
         Assert.NotNull(response);
         Assert.Equal(quantityAccountCreate, response.TotalItems);
-        Assert.All(response.Items, account => Assert.Equal(filterDebitCard, account.Type));
+        Assert.All(response.Items, account => Assert.Equal(filterDebitCard.GetDisplayName(), account.Type));
     }
 
     [Fact]
@@ -110,7 +111,7 @@ public class AccountControllerTest
 
         Assert.NotNull(response);
         Assert.Equal(accountCreate.Name, response.Name);
-        Assert.Equal(accountCreate.Type, response.Type);
+        Assert.Equal(accountCreate.Type.GetDisplayName(), response.Type);
         Assert.Equal(accountCreate.Balance, response.Balance);
     }
 
@@ -149,7 +150,7 @@ public class AccountControllerTest
         Assert.NotNull(response);
 
         Assert.Equal(accountCreate.Name, response.Name);
-        Assert.Equal(accountCreate.Type, response.Type);
+        Assert.Equal(accountCreate.Type.GetDisplayName(), response.Type);
         Assert.Equal(accountCreate.Balance, response.Balance);
     }
 

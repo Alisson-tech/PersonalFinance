@@ -1,4 +1,5 @@
 ﻿using FinanceSimplify.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinanceSimplify.Data;
 
@@ -27,9 +28,14 @@ public class Accounts : BaseEntity
 
 public enum AccountType
 {
+    [Display(Name = "Crédito")]
     CreditCard,
+    [Display(Name = "Débito")]
     DebitCard,
+    [Display(Name = "Pix")]
     Pix,
+    [Display(Name = "Voucher Alimentação")]
     FoodVoucher,
+    [Display(Name = "Poupança")]
     savings
 }

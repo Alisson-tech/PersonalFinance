@@ -36,9 +36,9 @@ public class Transactions : BaseEntity
 
 public enum TransactionType
 {
-    [Display(Name = "Despesas")]
+    [Display(Name = "Dispesas")]
     Expense,
-    [Display(Name = "Receita")]
+    [Display(Name = "Rendimentos")]
     Income
 }
 
